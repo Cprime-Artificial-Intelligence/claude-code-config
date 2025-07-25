@@ -1,0 +1,24 @@
+# Credentials and sensitive data
+.credentials.json
+
+# Conversation history and session data
+projects/
+todos/
+shell-snapshots/
+statsig/
+
+# Node modules
+node_modules/
+local/node_modules/
+
+# Package lock files (can be regenerated)
+local/package-lock.json
+
+# Settings that may contain sensitive data
+settings.local.json
+
+# Any other sensitive files
+*.key
+*.pem
+*.env
+.env*
