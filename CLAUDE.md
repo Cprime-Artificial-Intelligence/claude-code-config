@@ -260,7 +260,7 @@ gh api repos/:owner/:repo/collaborators/USERNAME/permission --jq '.permission'
 
 ### 5. **Execute**  
    - Work **one Task at a time** (milestone or task group)
-   - Spawn sub‑agents to tackle multiple sub‑tasks in parallel **within** that Task only
+   - Spawn specialized sub‑agents to tackle multiple sub‑tasks in parallel **within** that Task only
    - **Local:** Keep `tasks.md` in sync with status, progress notes, timestamps
    - **GitHub:** Update issue status, add progress comments, close completed sub‑tasks
 
@@ -271,6 +271,69 @@ gh api repos/:owner/:repo/collaborators/USERNAME/permission --jq '.permission'
    - **Local:** Mark Task "✅ Complete" in `tasks.md`
    - **GitHub:** Close milestone when all sub‑task issues are closed
    - Rinse & repeat for next Task
+
+## Specialized Subagents
+
+**CRITICAL:** Use the built-in specialized subagents to implement the disciplined methodology. Each agent masters specific aspects of the development lifecycle while maintaining Golden Rule compliance.
+
+### Available Subagents
+
+**🔍 requirements-analyst**
+- **Purpose**: Translates user needs into "As a/I want/So that" user stories with testable acceptance criteria
+- **When to use**: User describes new features, changes existing requirements, or needs requirement review
+- **Output**: Updates to requirements.md (local) or GitHub issues with `requirement` label
+
+**🏗️ system-architect** 
+- **Purpose**: Creates design.md with ADR format, enforces SOLID principles, makes architectural decisions
+- **When to use**: After requirements are locked, need architectural review, or design compliance validation
+- **Output**: Updates to design.md (local) or GitHub wiki/discussions with architecture decisions
+
+**📋 task-planner**
+- **Purpose**: Decomposes Tasks into Sub-tasks with requirement traceability and "one Task at a time" discipline  
+- **When to use**: After design is locked, need implementation planning, or task status updates
+- **Output**: Updates to tasks.md (local) or GitHub milestones and task-labeled issues
+
+**👀 code-reviewer**
+- **Purpose**: Enforces SOLID principles, prevents monolithic patterns, provides specific refactoring suggestions
+- **When to use**: After code implementation, before merging, or when quality issues are suspected
+- **Output**: Code review feedback with specific improvement recommendations
+
+**🐙 github-project-manager**
+- **Purpose**: Masters GitHub CLI operations for issue/milestone tracking when using GitHub method
+- **When to use**: Only when `.github-tracking` exists, need GitHub setup, or GitHub status reporting
+- **Output**: GitHub issues, milestones, labels, and project board management
+
+**🎯 workflow-orchestrator**
+- **Purpose**: Guards Golden Rule, orchestrates 6-phase lifecycle, coordinates all other agents
+- **When to use**: Need overall project coordination, phase status, or Golden Rule compliance checking
+- **Output**: Project status reports and methodology compliance enforcement
+
+### Agent Coordination Protocol
+
+1. **Phase-Based Usage**: Each agent specializes in specific lifecycle phases
+2. **Golden Rule Enforcement**: All agents respect the "no code without active sub-task" rule
+3. **Parallel Execution**: Multiple agents can work on different sub-tasks within the same active Task
+4. **Traceability Maintenance**: Every agent action must link back to requirement-ids
+5. **Cross-Agent Communication**: Agents coordinate through the shared methodology and file system
+
+### Usage Examples
+
+```bash
+# Use requirements-analyst for new feature requests
+"I need users to reset passwords" → requirements-analyst creates user story
+
+# Use system-architect after requirements locked  
+"Design the password reset flow" → system-architect creates ADR in design.md
+
+# Use task-planner after design locked
+"Plan the implementation" → task-planner creates tasks.md with sub-tasks
+
+# Use code-reviewer after implementation
+"Review this authentication code" → code-reviewer provides SOLID compliance feedback
+
+# Use workflow-orchestrator for coordination
+"What's our project status?" → workflow-orchestrator provides phase report
+```
 
 ## File Conventions
 

@@ -96,8 +96,8 @@ check_secrets() {
                 # Calculate entropy
                 entropy=$(calculate_entropy "$clean_secret" 2>/dev/null || echo "0")
                 
-                # High entropy threshold (base-2)
-                if (( $(echo "$entropy > 4.5" | bc -l) )); then
+                # High entropy threshold (base-2) - raised to avoid documentation false positives
+                if (( $(echo "$entropy > 5.0" | bc -l) )); then
                     echo -e "${RED}❌ High entropy string detected in $file (entropy: $entropy):${NC}"
                     echo -e "${YELLOW}Line: $line${NC}"
                     violations=$((violations + 1))
