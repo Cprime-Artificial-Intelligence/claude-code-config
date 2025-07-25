@@ -1,0 +1,140 @@
+#!/bin/bash
+
+# Pre-commit hook to prevent secrets and high entropy patterns from being committed
+# This hook checks for potential API keys, tokens, and other sensitive data
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+echo -e "${GREEN}🔒 Running pre-commit security checks...${NC}"
+
+# Function to calculate entropy of a string
+calculate_entropy() {
+    local string="$1"
+    echo "$string" | python3 -c "
+import sys
+import math
+from collections import Counter
+
+def entropy(s):
+    if not s:
+        return 0
+    counter = Counter(s)
+    length = len(s)
+    return -sum((count/length) * math.log2(count/length) for count in counter.values())
+
+print(entropy(sys.stdin.read().strip()))
+"
+}
+
+# Function to check if a line contains potential secrets
+check_secrets() {
+    local file="$1"
+    local violations=0
+    
+    # Skip binary files
+    if file "$file" | grep -q "binary"; then
+        return 0
+    fi
+    
+    # Common secret patterns
+    local patterns=(
+        'password\s*[:=]\s*["\047][^"\047\s]{8,}'
+        'api[_-]?key\s*[:=]\s*["\047][^"\047\s]{16,}'
+        'secret[_-]?key\s*[:=]\s*["\047][^"\047\s]{16,}'
+        'access[_-]?token\s*[:=]\s*["\047][^"\047\s]{16,}'
+        'auth[_-]?token\s*[:=]\s*["\047][^"\047\s]{16,}'
+        'bearer\s+[A-Za-z0-9\-\._~\+\/]+=*'
+        'sk-[A-Za-z0-9]{32,}'  # OpenAI API keys
+        'xoxb-[0-9]{11,13}-[0-9]{11,13}-[A-Za-z0-9]{24}'  # Slack bot tokens
+        'ghp_[A-Za-z0-9]{36}'  # GitHub personal access tokens
+        'gho_[A-Za-z0-9]{36}'  # GitHub OAuth tokens
+        'github_pat_[A-Za-z0-9_]{82}'  # New GitHub tokens
+        'glpat-[A-Za-z0-9\-\_]{20}'  # GitLab personal access tokens
+        'AKIA[0-9A-Z]{16}'  # AWS access keys
+        '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'  # UUIDs as potential secrets
+    )
+    
+    for pattern in "${patterns[@]}"; do
+        if grep -iP "$pattern" "$file" >/dev/null 2>&1; then
+            echo -e "${RED}❌ Potential secret found in $file:${NC}"
+            grep -inP --color=always "$pattern" "$file"
+            violations=$((violations + 1))
+        fi
+    done
+    
+    # High entropy check for long strings
+    while IFS= read -r line; do
+        # Skip comments and empty lines
+        if [[ "$line" =~ ^[[:space:]]*# ]] || [[ -z "${line// }" ]]; then
+            continue
+        fi
+        
+        # Extract potential secrets (quoted strings, tokens, etc.)
+        potential_secrets=$(echo "$line" | grep -oP '["'\''`][A-Za-z0-9+/=_\-\.]{20,}["'\''`]|[A-Za-z0-9+/=_\-\.]{32,}' || true)
+        
+        while IFS= read -r secret; do
+            if [[ -n "$secret" ]]; then
+                # Remove quotes
+                clean_secret=$(echo "$secret" | sed 's/^["`'\'']*//; s/["`'\'']*$//')
+                
+                # Skip if it's too short or contains mostly repeating characters
+                if [[ ${#clean_secret} -lt 20 ]]; then
+                    continue
+                fi
+                
+                # Check for repeating patterns (like "aaaaaaaa" or "12121212")
+                if echo "$clean_secret" | grep -qP '^(.)\1{10,}$|^(..)\2{5,}$|^(...)\3{3,}$'; then
+                    continue
+                fi
+                
+                # Calculate entropy
+                entropy=$(calculate_entropy "$clean_secret" 2>/dev/null || echo "0")
+                
+                # High entropy threshold (base-2)
+                if (( $(echo "$entropy > 4.5" | bc -l) )); then
+                    echo -e "${RED}❌ High entropy string detected in $file (entropy: $entropy):${NC}"
+                    echo -e "${YELLOW}Line: $line${NC}"
+                    violations=$((violations + 1))
+                fi
+            fi
+        done <<< "$potential_secrets"
+        
+    done < "$file"
+    
+    return $violations
+}
+
+# Get list of staged files
+staged_files=$(git diff --cached --name-only --diff-filter=ACM)
+
+if [[ -z "$staged_files" ]]; then
+    echo -e "${GREEN}✅ No files to check${NC}"
+    exit 0
+fi
+
+total_violations=0
+
+# Check each staged file
+while IFS= read -r file; do
+    if [[ -f "$file" ]]; then
+        check_secrets "$file"
+        violations=$?
+        total_violations=$((total_violations + violations))
+    fi
+done <<< "$staged_files"
+
+if [[ $total_violations -gt 0 ]]; then
+    echo -e "\n${RED}❌ Pre-commit check failed: $total_violations potential secret(s) detected!${NC}"
+    echo -e "${YELLOW}Please review and remove any sensitive data before committing.${NC}"
+    echo -e "${YELLOW}If these are false positives, you can bypass with: git commit --no-verify${NC}"
+    exit 1
+else
+    echo -e "${GREEN}✅ No secrets detected. Safe to commit!${NC}"
+    exit 0
+fi
