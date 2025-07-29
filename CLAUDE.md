@@ -417,6 +417,32 @@ Watch for these warning signs of monolithic code:
 
 When flagging code quality issues, suggest specific refactoring strategies rather than just identifying problems.
 
+## AI Agent Task Management Guidelines
+
+**CRITICAL**: AI agents must never provide human-centric time estimates:
+
+### Prohibited Practices:
+- Using hour/day/week estimates (e.g., "2 hours", "3 days")  
+- Providing "effort estimation and timeline planning"
+- Tracking "actual vs estimated" time
+- Assuming human work patterns or constraints
+
+### Preferred Approaches:
+- Use complexity ratings: Low/Medium/High/Critical
+- Focus on task dependencies and sequencing
+- Use status-based tracking (Not Started/In Progress/Complete/Blocked)
+- Emphasize task definition quality over time prediction
+- Prioritize by complexity, risk, or dependency order
+
+### Complexity Rating Guidelines:
+- **Low**: Simple, well-defined tasks with minimal dependencies
+- **Medium**: Standard implementation tasks requiring some research/integration
+- **High**: Complex tasks with multiple dependencies or significant technical challenges
+- **Critical**: Tasks that are blockers for other work or have major architectural impact
+
+### Rationale:
+AI agents can complete tasks in minutes that might take humans hours/days. Time estimates create false expectations and don't reflect AI capabilities or constraints.
+
 ## Safety & Tool Use
 
 * Allowed Shell commands: git, npm, python, etc.
