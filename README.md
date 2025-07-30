@@ -51,14 +51,24 @@ project-root/
 
 ### Installation
 
+#### Option 1: From forked repository (recommended)
 ```bash
-curl -sSL https://raw.githubusercontent.com/aaronsb/claude-code-config/main/install.sh | bash
+# Replace YOUR_USERNAME with your GitHub username
+git clone https://github.com/YOUR_USERNAME/claude-code-config.git ~/.claude
+cd ~/.claude && ./install.sh
 ```
 
-Or manual:
+#### Option 2: Remote install with environment variable  
 ```bash
-git clone https://github.com/aaronsb/claude-code-config.git ~/.claude
-cd ~/.claude && ./install.sh
+# Set your repository URL
+export CLAUDE_CONFIG_REPO="https://github.com/YOUR_USERNAME/claude-code-config.git"
+curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/claude-code-config/main/install.sh | bash
+```
+
+#### Option 3: Interactive install
+```bash
+# The installer will prompt for repository URL if not detected
+curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/claude-code-config/main/install.sh | bash
 ```
 
 ### Usage

@@ -14,7 +14,30 @@ NC='\033[0m' # No Color
 
 # Configuration
 CLAUDE_DIR="$HOME/.claude"
-REPO_URL="https://github.com/aaronsb/claude-code-config.git"
+
+# Dynamically determine repository URL
+if [[ -d ".git" ]] && command_exists git; then
+    # If running from within the repo, use its origin
+    REPO_URL=$(git remote get-url origin 2>/dev/null || echo "")
+    if [[ -z "$REPO_URL" ]]; then
+        echo -e "${RED}❌ Could not determine repository URL${NC}"
+        echo -e "${YELLOW}Please run this script from within the claude-code-config repository${NC}"
+        exit 1
+    fi
+else
+    # Fallback to environment variable or prompt user
+    if [[ -n "$CLAUDE_CONFIG_REPO" ]]; then
+        REPO_URL="$CLAUDE_CONFIG_REPO"
+    else
+        echo -e "${YELLOW}⚠️  No git repository detected. Please provide the repository URL:${NC}"
+        echo -e "${BLUE}Example: https://github.com/YOUR_USERNAME/claude-code-config.git${NC}"
+        read -p "Repository URL: " REPO_URL
+        if [[ -z "$REPO_URL" ]]; then
+            echo -e "${RED}❌ Repository URL is required${NC}"
+            exit 1
+        fi
+    fi
+fi
 
 echo -e "${BLUE}🤖 Claude Code Configuration Installer${NC}"
 echo -e "${BLUE}======================================${NC}"
