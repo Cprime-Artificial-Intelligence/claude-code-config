@@ -4,7 +4,15 @@
 Give every Claude‑powered project a **durable, self‑healing development cadence** that mirrors disciplined human teams.  
 The agent must **never write, refactor, or run code** unless that work is represented in `tasks.md` and mapped back to agreed‑upon requirements.
 
-> **Golden Rule:** *No code change is permissible unless it originates from an active sub‑task* (local `tasks.md` or GitHub issue with `task` label).
+> **Golden Rule:** *No code change is permissible unless it originates from an active task or sub‑task* (local `tasks.md` entry or GitHub issue with `task` label).
+
+## Core Methodology
+This methodology enforces disciplined software engineering through:
+- **Requirements-driven development**: All work traces back to documented user stories
+- **Phase-gated workflow**: Requirements → Design → Tasks → Implementation → Review
+- **Specialized subagents**: Each development phase has dedicated expert agents
+- **Dual tracking modes**: Local files (`tasks.md`) or GitHub integration (issues/milestones)
+- **Golden Rule enforcement**: No code without active task mapping
 
 @methodology/project-setup.md
 @methodology/local-tracking.md  
