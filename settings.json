@@ -7,5 +7,10 @@
   },
   "feedbackSurveyState": {
     "lastShownTime": 1754084596600
+  },
+  "agentModelOverrides": {
+    "requirements-analyst": "opus",
+    "system-architect": "opus",
+    "task-planner": "opus"
   }
 }
