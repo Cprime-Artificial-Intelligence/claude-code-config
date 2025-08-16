@@ -5,7 +5,7 @@
 |-----------------|-----------------------|--------------------------|
 | `requirements.md` | *Source of truth for WHAT to build.*  Contains User Stories in **"As a …, I want …, so that …"** form.  Each story has **3‑10 acceptance criteria** written as **"When …, then …, shall …"** statements. | • Auto‑append / edit whenever the user articulates a new need.<br>• Keep stories atomic & testable.<br>• Maintain changelog at bottom. |
 | `design.md`     | *Source of truth for HOW to build.*  Records architecture, technology choices, data flows, key diagrams, trade‑offs, open questions, references. | • Must cite corresponding requirement IDs.<br>• Revise collaboratively with user before any task planning.<br>• Mark decisions "✅ Locked" when final. |
-| `tasks.md`      | *Source of truth for DOING the work.*  A living implementation plan.  Structured as **Tasks → Sub‑tasks**. | • One **Task** at a time may be decomposed and worked on.<br>• Each **Sub‑task** must list the `requirement‑ids` it satisfies.<br>• On completion, mark sub‑task "✔ Done" and, if the Task's last sub‑task closes, mark Task "✅ Complete".<br>• Claude (or its sub‑agents) MUST update this file after every change. |
+| `tasks.md`      | *Source of truth for DOING the work.*  A living implementation plan.  Tracks active work items, explorations, and experiments. | • Declare what you're working on - features, explorations, or experiments.<br>• Link work items to requirements when applicable.<br>• Mark items "✔ Done" when complete, "🔬 Experimental" for exploration.<br>• Update regularly to maintain work visibility.<br>• Use branches for experimental work when appropriate. |
 
 ## File Conventions
 
@@ -32,14 +32,26 @@ project-root/
 
 ### tasks.md Structure
 ```markdown
-## Task 01 – User Authentication [req-001, req-002]
-- [ ] sub-01-a Research OAuth providers (req-001)
-- [✔] sub-01-b Draft login UI skeleton (req-002)
-- [ ] sub-01-c Implement token refresh (req-001)
+## Active Work
 
-## Task 02 – Payment Integration [req-003, req-004]
-- [ ] sub-02-a Setup Stripe SDK (req-003)
-- [ ] sub-02-b Create checkout flow (req-003)
+### User Authentication [req-001, req-002]
+- [ ] Research OAuth providers (req-001)
+- [✔] Draft login UI skeleton (req-002)
+- [ ] Implement token refresh (req-001)
+
+### Payment Integration [req-003, req-004]
+- [ ] Setup Stripe SDK (req-003)
+- [ ] Create checkout flow (req-003)
+
+### Exploration & Experiments
+- [🔬] Test WebSocket performance (branch: websocket-experiment)
+- [🔬] Evaluate alternative auth libraries
+
+### Rogue-like Development Mode
+- [⚔️] ACTIVE: Complete auth rewrite (checkpoint: commit a5d06bd)
+  - Mode: No incremental commits until feature complete
+  - Risk: High - may need full restart from checkpoint
+  - Benefit: Fast iteration without commit overhead
 ```
 
 ### Story Format (e.g., `req-001-user-login.md`)
