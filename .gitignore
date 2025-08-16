@@ -11,7 +11,8 @@ statsig/
 node_modules/
 local/node_modules/
 
-# Package lock files (can be regenerated)
+# Package files (auto-managed by Claude Code)
+local/package.json
 local/package-lock.json
 
 # Settings that may contain sensitive data
