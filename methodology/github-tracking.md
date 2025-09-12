@@ -1,26 +1,35 @@
 ### GitHub Method Equivalents
 | GitHub Feature | Authoritative Purpose | Management Commands |
 |----------------|-----------------------|---------------------|
-| **Issues with labels** | *Requirements tracking.* Each issue = User Story with `requirement` label. Body contains "As/Want/So" format + acceptance criteria. | `gh issue create --label requirement --title "req-001: User Login" --body-file .claude-github/req.md`<br>`gh issue list --label requirement --state all` |
-| **Discussion/Wiki** | *Design decisions.* Architecture docs, tech choices, trade-offs. Link to requirement issues. | `gh api repos/:owner/:repo/contents/wiki/Design.md --method PUT --field content=@.claude-github/design.md`<br>`gh repo view --web` (navigate to wiki) |
-| **Milestones + Issues** | *Task management.* Milestones = Tasks, Issues = Sub-tasks with `task` label. | `gh issue create --milestone "Task-01-Auth" --label task --assignee @me`<br>`gh issue list --milestone "Task-01-Auth" --label task` |
+| **Project Board Items** | *Requirements & feature tracking.* Strategic work items = User Stories with "As/Want/So" format + acceptance criteria. | `gh project item-create PROJECT_NUMBER --title "req-001: User Login" --body "As a user..."`<br>`gh project item-list PROJECT_NUMBER --format json` |
+| **Issues** | *Bug & problem tracking.* Tactical issues that arise during implementation. Link to board items for traceability. | `gh issue create --label bug --title "Fix auth token expiry" --body "Related to req-001"`<br>`gh issue list --label bug --state open` |
+| **Discussion/Wiki** | *Design decisions.* Architecture docs, tech choices, trade-offs. Reference board item IDs. | `gh api repos/:owner/:repo/contents/wiki/Design.md --method PUT --field content=@.claude-github/design.md`<br>`gh repo view --web` (navigate to wiki) |
+| **Milestones** | *Sprint/release grouping.* Time-boxed collections of board items and issues. | `gh api repos/:owner/:repo/milestones --method POST --field title="Sprint-01"`<br>`gh project item-edit --id ITEM_ID --field-id FIELD_ID --iteration "Sprint-01"` |
 
 ## GitHub CLI Command Reference
 
-### Requirements Management
+### Requirements Management (Project Board)
 ```bash
-# List all requirements
-gh issue list --label requirement --state all --json number,title,state,labels
+# List all requirements from project board
+gh project item-list PROJECT_NUMBER --owner OWNER --format json | 
+  jq '.items[] | select(.content.type=="DraftIssue" or .content.type=="Issue") | {id, title: .content.title, body: .content.body, status: .fieldValues.status}'
 
-# Create new requirement
+# Create new requirement as board item
 echo "As a user I want..." > .claude-github/req-temp.md
-gh issue create --label requirement --title "req-XXX: Title" --body-file .claude-github/req-temp.md
+gh project item-create PROJECT_NUMBER --owner OWNER \
+  --title "req-XXX: Title" \
+  --body "$(cat .claude-github/req-temp.md)"
 
 # Update requirement (add acceptance criteria)
-gh issue edit NUMBER --body-file .claude-github/updated-req.md
+gh project item-edit --id ITEM_ID --project-id PROJECT_NUMBER \
+  --body "$(cat .claude-github/updated-req.md)"
 
 # View requirement details
-gh issue view NUMBER --json title,body,labels,state
+gh project item-view PROJECT_NUMBER --id ITEM_ID --format json
+
+# Move requirement to different status column
+gh project item-edit --id ITEM_ID --project-id PROJECT_NUMBER \
+  --field-id STATUS_FIELD_ID --single-select-option-id OPTION_ID
 ```
 
 ### Design Management  
@@ -35,44 +44,52 @@ gh api repos/:owner/:repo/contents/wiki/Design.md --method PUT \
   --field content="$(base64 -i .claude-github/design-update.md)"
 ```
 
-### Task Management
+### Bug & Problem Tracking (Issues)
 ```bash
-# Create milestone (Task)
-gh api repos/:owner/:repo/milestones --method POST \
-  --field title="Task-01-Authentication" \
-  --field description="User auth implementation"
+# Create bug/problem issue linked to board item
+gh issue create --label bug \
+  --title "Fix: Auth token expires too quickly" \
+  --body "Related to board item: req-001-user-login\n\nProblem: JWT tokens expire after 5 minutes instead of 1 hour"
 
-# List all tasks (milestones) 
-gh api repos/:owner/:repo/milestones --jq '.[] | {title, state, open_issues, closed_issues}'
+# List all bugs/problems
+gh issue list --label bug --state open --json number,title,state,labels
 
-# Create sub-task
-gh issue create --milestone "Task-01-Authentication" --label task \
-  --title "sub-01-a: Research OAuth providers (req-001)" \
-  --assignee @me --body "Implements req-001 acceptance criteria"
+# Create implementation problem
+gh issue create --label problem \
+  --title "Problem: OAuth callback URL mismatch" \
+  --body "Blocking req-002-oauth-integration\n\nIssue: Callback URL in dev doesn't match production pattern"
 
-# List sub-tasks for active milestone
-gh issue list --milestone "Task-01-Authentication" --label task --json number,title,state
+# Link issue to project board item
+gh project item-add PROJECT_NUMBER --owner OWNER --url ISSUE_URL
 
-# Complete sub-task  
-gh issue close NUMBER --comment "✔ Done: OAuth provider research complete"
+# Close resolved issue
+gh issue close NUMBER --comment "✔ Fixed: Token expiry now set to 1 hour"
 
-# Check milestone progress
-gh api repos/:owner/:repo/milestones --jq '.[] | select(.title=="Task-01-Authentication") | {open_issues, closed_issues}'
+# List issues by milestone (for sprint tracking)
+gh issue list --milestone "Sprint-01" --json number,title,state,labels
 ```
 
 ### Status & Review Commands
 ```bash
 # Project overview
-gh repo view --json name,description,hasIssuesEnabled,hasProjectsEnabled
-gh issue list --label requirement --state open --limit 5
-gh api repos/:owner/:repo/milestones --jq '.[] | select(.state=="open") | .title'
+gh project list --owner OWNER --format json | jq '.projects[] | {number, title, url}'
+gh project item-list PROJECT_NUMBER --owner OWNER --limit 10 --format json | \
+  jq '.items[] | {title: .content.title, status: .fieldValues.status}'
 
-# Daily standup view
-gh issue list --assignee @me --label task --state open --json title,milestone
+# Requirements in progress
+gh project item-list PROJECT_NUMBER --owner OWNER --format json | \
+  jq '.items[] | select(.fieldValues.status.name=="In Progress") | .content.title'
 
-# Requirements completion status  
-gh issue list --label requirement --state all --json number,title,state | \
-  jq 'group_by(.state) | map({state: .[0].state, count: length})'
+# Sprint/milestone status
+gh api repos/:owner/:repo/milestones --jq '.[] | select(.state=="open") | {title, open_issues, closed_issues}'
+
+# Bug/problem tracking
+gh issue list --label bug --state open --json number,title,assignee | \
+  jq 'group_by(.assignee.login) | map({assignee: .[0].assignee.login, count: length})'
+
+# Board completion metrics
+gh project item-list PROJECT_NUMBER --owner OWNER --format json | \
+  jq '[.items[] | .fieldValues.status.name] | group_by(.) | map({status: .[0], count: length})'
 ```
 
 ## GitHub Setup & Configuration
@@ -85,8 +102,8 @@ gh issue list --label requirement --state all --json number,title,state | \
 gh label list --json name,color,description
 
 # Create required labels (run these if missing)
-gh label create "requirement" --color "0052CC" --description "User story/requirement tracking"
-gh label create "task" --color "00AA00" --description "Implementation sub-task"
+gh label create "bug" --color "EE0000" --description "Bug or problem during implementation"
+gh label create "problem" --color "FF6600" --description "Implementation blocker or issue"
 gh label create "design" --color "9932CC" --description "Architecture/design decision"
 gh label create "blocked" --color "FF0000" --description "Work blocked, needs resolution"
 gh label create "ready" --color "FFAA00" --description "Ready for implementation"
@@ -110,29 +127,31 @@ gh label create "priority-low" --color "44FF44" --description "Low priority item
 2. *"Should we use a simple kanban view (To Do/In Progress/Done) or milestone-based planning?"*
 3. *"Do you want automated project board updates when issues change status?"*
 
-### Project Board Creation
+### Project Board Creation & Setup
 ```bash
-# Create basic kanban project
-gh project create --title "Project Development" --body "Main development tracking board"
+# Create project board for requirements tracking
+gh project create --owner OWNER --title "Product Requirements" \
+  --body "Strategic requirement and feature tracking board"
 
-# Get project number from creation output, then:
-PROJECT_NUMBER="1"  # Replace with actual number
+# Get project number and details
+gh project list --owner OWNER --format json | \
+  jq '.projects[] | {number, title, url, id}'
 
-# Add standard columns
-gh api graphql -f query='
-  mutation {
-    addProjectV2DraftIssue(input: {
-      projectId: "PROJECT_ID"
-      title: "Configure Board"
-    }) {
-      projectItem {
-        id
-      }
-    }
-  }'
+# View project fields (to get field IDs for status, etc.)
+gh project field-list PROJECT_NUMBER --owner OWNER --format json
 
-# Alternative: Create via web UI and get project info
-gh project list --owner OWNER --format json | jq '.[] | {number, title, url}'
+# Create requirement item on board
+gh project item-create PROJECT_NUMBER --owner OWNER \
+  --title "req-001: User authentication" \
+  --body "As a user, I want to log in securely, so that I can access my personal data"
+
+# Add existing issue to project (for bugs/problems only)
+gh project item-add PROJECT_NUMBER --owner OWNER \
+  --url "https://github.com/owner/repo/issues/123"
+
+# Update item status
+gh project item-edit --project-id PROJECT_NUMBER --id ITEM_ID \
+  --field-id STATUS_FIELD_ID --single-select-option-id IN_PROGRESS_ID
 ```
 
 ### Automated Workflows (Optional)
