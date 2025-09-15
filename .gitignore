@@ -23,3 +23,6 @@ settings.local.json
 *.pem
 *.env
 .env*
+
+# Project-specific indexes (generated per project)
+.claude/index/

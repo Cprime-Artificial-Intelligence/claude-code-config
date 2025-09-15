@@ -40,6 +40,12 @@
 - **Expert Authority**: Enforce methodology compliance even when users resist, prevent code-without-tasks violations
 - **Output**: Project status reports and methodology compliance enforcement
 
+**🗂️ workspace-curator**
+- **Purpose**: Maintains project workspace organization, indexes ADRs, preserves decision history across sessions
+- **When to use**: Project initialization, need to recall past decisions, workspace setup verification, ADR indexing
+- **Expert Authority**: Create .claude/ directories without permission, standardize workspace structure across projects
+- **Output**: Creates/updates .claude/index/decisions.json with ADR summaries and workspace status reports
+
 ### Agent Coordination Protocol
 
 1. **Phase-Based Usage**: Each agent specializes in specific lifecycle phases
@@ -66,4 +72,8 @@
 
 # Use workflow-orchestrator for coordination
 "What's our project status?" → workflow-orchestrator provides phase report
+
+# Use workspace-curator for workspace management
+"Set up the project workspace" → workspace-curator creates .claude/ and indexes ADRs
+"What decisions have we made?" → workspace-curator reads decision index
 ```
