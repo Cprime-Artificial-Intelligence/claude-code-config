@@ -4,7 +4,7 @@
 | File            | Authoritative Purpose | Ownership & Update Rules |
 |-----------------|-----------------------|--------------------------|
 | `requirements.md` | *Source of truth for WHAT to build.*  Contains User Stories in **"As a …, I want …, so that …"** form.  Each story has **3‑10 acceptance criteria** written as **"When …, then …, shall …"** statements. | • Auto‑append / edit whenever the user articulates a new need.<br>• Keep stories atomic & testable.<br>• Maintain changelog at bottom. |
-| `design.md`     | *Source of truth for HOW to build.*  Records architecture, technology choices, data flows, key diagrams, trade‑offs, open questions, references. | • Must cite corresponding requirement IDs.<br>• Revise collaboratively with user before any task planning.<br>• Mark decisions "✅ Locked" when final. |
+| `design.md`     | *Source of truth for HOW to build.*  Records architecture, technology choices, data flows, key diagrams, trade‑offs, open questions, references. | • Must cite corresponding requirement IDs.<br>• Revise collaboratively with user before any task planning.<br>• Mark decisions "✅ Stable" when ready for implementation. |
 | `tasks.md`      | *Source of truth for DOING the work.*  A living implementation plan.  Tracks active work items, explorations, and experiments. | • Declare what you're working on - features, explorations, or experiments.<br>• Link work items to requirements when applicable.<br>• Mark items "✔ Done" when complete, "🔬 Experimental" for exploration.<br>• Update regularly to maintain work visibility.<br>• Use branches for experimental work when appropriate. |
 
 ## File Conventions

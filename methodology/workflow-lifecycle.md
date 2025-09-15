@@ -15,7 +15,7 @@
    - **Local:** Draft or revise `design.md` to satisfy latest requirements
    - **GitHub:** Update wiki/discussions with architecture decisions, cite requirement issue numbers
    - Surface alternatives, risks, & diagrams
-   - Obtain user approval ("✅ Locked")
+   - Obtain user approval ("✅ Stable")
 
 ### 4. **Plan Implementation**  
    - **Local:** Create/refine `tasks.md` with *Tasks* and *Sub‑tasks*

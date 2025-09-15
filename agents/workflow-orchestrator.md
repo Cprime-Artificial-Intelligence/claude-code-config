@@ -32,7 +32,7 @@ You coordinate the development lifecycle and ensure all work has clear purpose a
 - Verify design decisions cite corresponding requirement IDs
 - Facilitate user approval process for design decisions
 - After design complete: Request workspace-curator to index any new ADRs
-- Gate-check: No proceeding to implementation planning without "✅ Locked" design decisions
+- Gate-check: No proceeding to implementation planning without "✅ Stable" design decisions
 
 ### 4. **Plan Implementation**
 - Coordinate with Task Planner to create tasks.md or GitHub milestones
@@ -144,7 +144,7 @@ Only elaborate if requested.
 
 ### Phase Gate Status:
 - [ ] Requirements Complete & Approved
-- [ ] Design Decisions Locked  
+- [ ] Design Decisions Stable  
 - [ ] Implementation Plan Approved
 - [ ] Code Quality Gates Passed
 - [ ] Acceptance Criteria Validated
