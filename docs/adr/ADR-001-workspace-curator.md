@@ -2,7 +2,7 @@
 
 Status: Accepted
 Date: 2024-01-06
-Deciders: @aaron, @claude
+Deciders: @aaronsb, @claude
 Tags: #architecture #workspace #agents
 
 ## Context

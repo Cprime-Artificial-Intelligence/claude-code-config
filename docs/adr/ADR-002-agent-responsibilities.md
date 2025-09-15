@@ -2,7 +2,7 @@
 
 Status: Proposed
 Date: 2025-09-15
-Deciders: @aaron, @claude
+Deciders: @aaronsb, @claude
 Tags: #architecture #agents #coordination
 
 ## Context
