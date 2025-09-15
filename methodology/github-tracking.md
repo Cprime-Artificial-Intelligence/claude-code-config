@@ -95,7 +95,7 @@ gh project item-list PROJECT_NUMBER --owner OWNER --format json | \
 ## GitHub Setup & Configuration
 
 ### Required Labels Setup
-**CRITICAL:** Always verify and create required labels before using GitHub tracking:
+Always verify and create required labels before using GitHub tracking:
 
 ```bash
 # Check existing labels

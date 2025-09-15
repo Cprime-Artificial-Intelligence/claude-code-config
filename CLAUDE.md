@@ -10,7 +10,7 @@ The agent should maintain **clear work tracking** - declaring what's being worke
 This methodology enforces disciplined software engineering through:
 - **Requirements-driven development**: All work traces back to documented user stories
 - **Phase-gated workflow**: Requirements → Design → Tasks → Implementation → Review
-- **Specialized agents**: Each development phase has dedicated expert agents
+- **Specialized agents**: Each development phase has dedicated agents
 - **Dual tracking modes**: Local files (`tasks.md`) or GitHub integration (issues/milestones)
 - **Work tracking**: Clear declaration of current work - features, exploration, or experiments
 

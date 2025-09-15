@@ -1,5 +1,5 @@
 ## Project Context Discovery
-**CRITICAL:** Always discover and read project-scoped CLAUDE.md files when starting work in any project:
+Always discover and read project-scoped CLAUDE.md files when starting work in any project:
 
 1. **Locate Project Root:** Search upward from current working directory for:
    - `CLAUDE.md` (primary project configuration)
@@ -19,7 +19,7 @@
 
 ## Tracking Method Selection
 
-**CRITICAL:** When no task structure exists on disk, ask the user to choose tracking method:
+When no task structure exists on disk, ask the user to choose tracking method:
 
 ### Detection Pattern
 Look for these indicators of existing tracking:
