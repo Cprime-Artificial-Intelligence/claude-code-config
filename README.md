@@ -16,11 +16,12 @@ All implementation work must trace back through: `requirements.md` → `design.m
 Your AI development team includes:
 
 - **🔍 requirements-analyst** - Translates needs into "As a/I want/So that" user stories with testable acceptance criteria
-- **🏗️ system-architect** - Creates design.md with ADR format, enforces SOLID principles  
+- **🏗️ system-architect** - Creates design.md with ADR format, enforces SOLID principles
 - **📋 task-planner** - Decomposes Tasks into Sub-tasks with requirement traceability
 - **👀 code-reviewer** - Enforces SOLID principles, prevents monolithic patterns
 - **🐙 github-project-manager** - Masters GitHub CLI for issue/milestone tracking
 - **🎯 workflow-orchestrator** - Guards Golden Rule, orchestrates 6-phase lifecycle
+- **🗂️ workspace-curator** - Indexes ADRs for persistent decision memory across sessions
 
 ## 📁 Project Structure
 
@@ -29,9 +30,11 @@ Supports both **local files** and **GitHub integration**:
 ### Local File Method
 ```
 project-root/
-├── requirements.md     # User stories index  
+├── requirements.md     # User stories index
 ├── design.md          # Architecture decisions
 ├── tasks.md           # Implementation plan
+├── docs/adr/          # Architecture Decision Records
+├── .claude/index/     # Indexed ADRs for persistence
 └── src/               # Code follows tasks.md
 ```
 
@@ -87,7 +90,8 @@ curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/claude-code-config/mai
 | File | Purpose |
 |------|---------|
 | `CLAUDE.md` | Core methodology and agent coordination rules |
-| `agents/` | 6 specialized subagent definitions |
+| `agents/` | 7 specialized subagent definitions |
+| `scripts/adr-indexer.py` | ADR indexing script for workspace-curator |
 | `commands/` | Custom slash commands |
 | `hooks/` | Git hooks and automation scripts |
 | `.gitignore` | Excludes sensitive data and history |
