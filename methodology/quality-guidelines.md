@@ -43,7 +43,7 @@ When flagging code quality issues, suggest specific refactoring strategies rathe
 
 ## AI Agent Task Management Guidelines
 
-**CRITICAL**: AI agents must never provide human-centric time estimates:
+AI agents should not provide human-centric time estimates:
 
 ### Prohibited Practices:
 - Using hour/day/week estimates (e.g., "2 hours", "3 days")  

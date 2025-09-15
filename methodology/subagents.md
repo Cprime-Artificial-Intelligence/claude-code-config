@@ -1,49 +1,49 @@
 ## Specialized Subagents
 
-**CRITICAL:** Use the built-in specialized subagents to implement the disciplined methodology. Each agent masters specific aspects of the development lifecycle while maintaining Golden Rule compliance.
+Use the built-in specialized subagents to implement the disciplined methodology. Each agent handles specific aspects of the development lifecycle while maintaining work traceability.
 
 ### Available Subagents
 
 **🔍 requirements-analyst**
 - **Purpose**: Translates user needs into "As a/I want/So that" user stories with testable acceptance criteria
 - **When to use**: User describes new features, changes existing requirements, or needs requirement review
-- **Expert Authority**: Challenge vague requests ("make it better"), demand specificity, refuse to elaborate weak user stories
-- **Output**: Updates to requirements.md (local) or GitHub issues with `requirement` label
+- **Quality focus**: Vague requirements lead to rework - ask clarifying questions rather than guessing intent
+- **Output**: Updates to requirements.md (local) or GitHub project board items (GitHub mode)
 
-**🏗️ system-architect** 
-- **Purpose**: Creates design.md with ADR format, enforces SOLID principles, makes architectural decisions
+**🏗️ system-architect**
+- **Purpose**: Creates design.md with ADR format, evaluates SOLID principles, documents architectural decisions
 - **When to use**: After requirements are locked, need architectural review, or design compliance validation
-- **Expert Authority**: Push back on architecturally unsound choices, refuse to justify SOLID violations, demand design clarity
+- **Quality focus**: Undocumented decisions get forgotten, SOLID violations create maintenance problems
 - **Output**: Updates to design.md (local) or GitHub wiki/discussions with architecture decisions
 
 **📋 task-planner**
-- **Purpose**: Decomposes Tasks into Sub-tasks with requirement traceability and "one Task at a time" discipline  
+- **Purpose**: Decomposes work into implementable tasks with requirement traceability
 - **When to use**: After design is locked, need implementation planning, or task status updates
-- **Expert Authority**: Question unrealistic task sequences, refuse poorly defined sub-tasks, enforce requirement traceability
-- **Output**: Updates to tasks.md (local) or GitHub milestones and task-labeled issues
+- **Quality focus**: Undefined tasks lead to incomplete work, missing dependencies cause delays
+- **Output**: Updates to tasks.md (local) or GitHub project boards with milestones
 
 **👀 code-reviewer**
-- **Purpose**: Enforces SOLID principles, prevents monolithic patterns, provides specific refactoring suggestions
+- **Purpose**: Reviews code for SOLID compliance, identifies monolithic patterns, provides specific refactoring suggestions
 - **When to use**: After code implementation, before merging, or when quality issues are suspected
-- **Expert Authority**: Provide honest quality assessment without diplomatic softening, call out violations directly
+- **Quality focus**: Each unaddressed violation makes the codebase harder to maintain
 - **Output**: Code review feedback with specific improvement recommendations
 
 **🐙 github-project-manager**
-- **Purpose**: Masters GitHub CLI operations for issue/milestone tracking when using GitHub method
+- **Purpose**: Handles GitHub CLI operations for project board and issue tracking
 - **When to use**: Only when `.github-tracking` exists, need GitHub setup, or GitHub status reporting
-- **Expert Authority**: Surface GitHub workflow inefficiencies directly, challenge poor project organization
-- **Output**: GitHub issues, milestones, labels, and project board management
+- **Quality focus**: Poor GitHub setup causes confusion between requirements and bugs
+- **Output**: GitHub project boards, issues, milestones, labels, and wiki management
 
 **🎯 workflow-orchestrator**
-- **Purpose**: Guards Golden Rule, orchestrates 6-phase lifecycle, coordinates all other agents
-- **When to use**: Need overall project coordination, phase status, or Golden Rule compliance checking
-- **Expert Authority**: Enforce methodology compliance even when users resist, prevent code-without-tasks violations
-- **Output**: Project status reports and methodology compliance enforcement
+- **Purpose**: Coordinates development lifecycle phases and ensures work has declared intent
+- **When to use**: Need overall project coordination, phase status, or work tracking verification
+- **Quality focus**: Without coordination, agents work in isolation and duplicate effort
+- **Output**: Project status reports and lifecycle phase coordination
 
 **🗂️ workspace-curator**
 - **Purpose**: Maintains project workspace organization, indexes ADRs, preserves decision history across sessions
 - **When to use**: Project initialization, need to recall past decisions, workspace setup verification, ADR indexing
-- **Expert Authority**: Create .claude/ directories without permission, standardize workspace structure across projects
+- **Quality focus**: Without indexing, past decisions are forgotten and teams repeat discussions
 - **Output**: Creates/updates .claude/index/decisions.json with ADR summaries and workspace status reports
 
 ### Agent Coordination Protocol
@@ -53,7 +53,7 @@
 3. **Parallel Execution**: Multiple agents can work on different sub-tasks within the same active Task
 4. **Traceability Maintenance**: Every agent action must link back to requirement-ids
 5. **Cross-Agent Communication**: Agents coordinate through the shared methodology and file system
-6. **Expert Resistance**: Agents resist vague inputs with targeted questions, refuse to elaborate poor requirements rather than building elaborate workarounds
+6. **Quality Standards**: Agents ask clarifying questions for vague inputs rather than making assumptions
 
 ### Usage Examples
 
