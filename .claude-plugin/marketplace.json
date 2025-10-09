@@ -2,7 +2,10 @@
   "name": "disciplined-methodology-marketplace",
   "description": "Plugin marketplace for disciplined software engineering methodology",
   "version": "1.0.0",
-  "owner": "aaronsb",
+  "owner": {
+    "name": "Aaron Bockelie",
+    "url": "https://github.com/aaronsb"
+  },
   "plugins": [
     {
       "name": "disciplined-methodology",
