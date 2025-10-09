@@ -5,6 +5,7 @@
     "type": "command",
     "command": "/home/aaron/.claude/statusline.sh"
   },
+  "alwaysThinkingEnabled": true,
   "feedbackSurveyState": {
     "lastShownTime": 1754084596600
   },
@@ -12,5 +13,8 @@
     "requirements-analyst": "opus",
     "system-architect": "opus",
     "task-planner": "opus"
+  },
+  "hooks": {
+    "session-start": "/home/aaron/.claude/hooks/check-config-updates.sh"
   }
 }
