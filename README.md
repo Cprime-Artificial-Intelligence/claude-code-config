@@ -6,7 +6,7 @@ A disciplined software engineering configuration for Claude Code featuring speci
 
 This configuration implements a **disciplined software engineering methodology** that mirrors real development teams through specialized subagents and strict process enforcement.
 
-### Golden Rule
+### Task-first rule
 > **No code change is permissible unless it originates from an active sub-task**
 
 All implementation work must trace back through: `requirements.md` → `design.md` → `tasks.md` → active sub-task
@@ -20,8 +20,8 @@ Your AI development team includes:
 - **📋 task-planner** - Decomposes Tasks into Sub-tasks with requirement traceability
 - **👀 code-reviewer** - Enforces SOLID principles, prevents monolithic patterns
 - **🐙 github-project-manager** - Masters GitHub CLI for issue/milestone tracking
-- **🎯 workflow-orchestrator** - Guards (formerly) golden Rule, orchestrates 6-phase lifecycle
-- **🗂️ workspace-curator** - Indexes ADRs for persistent decision memory across sessions
+- **🎯 workflow-orchestrator** - Enforces task-first rule, orchestrates 6-phase lifecycle
+- **🗂️ workspace-curator** - Maintains organized workspace structure and prevents documentation sprawl
 
 ## 📁 Project Structure
 
@@ -34,7 +34,7 @@ project-root/
 ├── design.md          # Architecture decisions
 ├── tasks.md           # Implementation plan
 ├── docs/adr/          # Architecture Decision Records
-├── .claude/index/     # Indexed ADRs for persistence
+├── .claude/           # Configuration and hooks
 └── src/               # Code follows tasks.md
 ```
 
@@ -81,7 +81,7 @@ curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/claude-code-config/mai
 3. **Use specialized agents** via `/agents` command
 4. **Follow the methodology**:
    - Capture requirements first
-   - Lock design decisions  
+   - Stabilize design decisions
    - Plan implementation tasks
    - Execute with active sub-tasks only
 
@@ -91,7 +91,6 @@ curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/claude-code-config/mai
 |------|---------|
 | `CLAUDE.md` | Core methodology and agent coordination rules |
 | `agents/` | 7 specialized subagent definitions |
-| `scripts/adr-indexer.py` | ADR indexing script for workspace-curator |
 | `commands/` | Custom slash commands |
 | `hooks/` | Git hooks and automation scripts |
 | `.gitignore` | Excludes sensitive data and history |
@@ -99,10 +98,10 @@ curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/claude-code-config/mai
 ## 🛠️ Methodology Phases
 
 1. **Detect Tracking Method** - Auto-choose local files vs GitHub
-2. **Capture Requirements** - User stories with acceptance criteria  
+2. **Capture Requirements** - User stories with acceptance criteria
 3. **Design Phase** - Architecture decisions with ADR format
 4. **Plan Implementation** - Task decomposition with traceability
-5. **Execute** - Code only with active sub-tasks (Golden Rule!)
+5. **Execute** - Code only with active sub-tasks (task-first rule!)
 6. **Review & Close** - Validate acceptance criteria
 
 ## ⚡ Features
