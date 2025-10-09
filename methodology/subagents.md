@@ -12,13 +12,13 @@ Use the built-in specialized subagents to implement the disciplined methodology.
 
 **🏗️ system-architect**
 - **Purpose**: Creates design.md with ADR format, evaluates SOLID principles, documents architectural decisions
-- **When to use**: After requirements are locked, need architectural review, or design compliance validation
+- **When to use**: After requirements are stable, need architectural review, or design compliance validation
 - **Quality focus**: Undocumented decisions get forgotten, SOLID violations create maintenance problems
 - **Output**: Updates to design.md (local) or GitHub wiki/discussions with architecture decisions
 
 **📋 task-planner**
 - **Purpose**: Decomposes work into implementable tasks with requirement traceability
-- **When to use**: After design is locked, need implementation planning, or task status updates
+- **When to use**: After design is stable, need implementation planning, or task status updates
 - **Quality focus**: Undefined tasks lead to incomplete work, missing dependencies cause delays
 - **Output**: Updates to tasks.md (local) or GitHub project boards with milestones
 
@@ -41,10 +41,10 @@ Use the built-in specialized subagents to implement the disciplined methodology.
 - **Output**: Project status reports and lifecycle phase coordination
 
 **🗂️ workspace-curator**
-- **Purpose**: Maintains project workspace organization, indexes ADRs, preserves decision history across sessions
-- **When to use**: Project initialization, need to recall past decisions, workspace setup verification, ADR indexing
-- **Quality focus**: Without indexing, past decisions are forgotten and teams repeat discussions
-- **Output**: Creates/updates .claude/index/decisions.json with ADR summaries and workspace status reports
+- **Purpose**: Maintains organized project workspace, documentation structure, and .claude/ directory
+- **When to use**: Project initialization, documentation getting disorganized, scattered ADRs/decisions, workspace cleanup needed
+- **Quality focus**: Unorganized documentation and scattered decisions create confusion and maintenance burden
+- **Output**: Organized .claude/ directory structure, well-structured documentation hierarchy, ADR organization (using adr-xxx numbering)
 
 ### Agent Coordination Protocol
 
@@ -61,10 +61,10 @@ Use the built-in specialized subagents to implement the disciplined methodology.
 # Use requirements-analyst for new feature requests
 "I need users to reset passwords" → requirements-analyst creates user story
 
-# Use system-architect after requirements locked  
+# Use system-architect after requirements stable
 "Design the password reset flow" → system-architect creates ADR in design.md
 
-# Use task-planner after design locked
+# Use task-planner after design stable
 "Plan the implementation" → task-planner creates tasks.md with sub-tasks
 
 # Use code-reviewer after implementation
@@ -74,6 +74,7 @@ Use the built-in specialized subagents to implement the disciplined methodology.
 "What's our project status?" → workflow-orchestrator provides phase report
 
 # Use workspace-curator for workspace management
-"Set up the project workspace" → workspace-curator creates .claude/ and indexes ADRs
-"What decisions have we made?" → workspace-curator reads decision index
+"Set up the project workspace" → workspace-curator creates .claude/ structure
+"Our design docs are scattered everywhere" → workspace-curator proposes organization
+"Where should this ADR go?" → workspace-curator recommends adr-xxx structure
 ```
