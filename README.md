@@ -20,7 +20,7 @@ Your AI development team includes:
 - **📋 task-planner** - Decomposes Tasks into Sub-tasks with requirement traceability
 - **👀 code-reviewer** - Enforces SOLID principles, prevents monolithic patterns
 - **🐙 github-project-manager** - Masters GitHub CLI for issue/milestone tracking
-- **🎯 workflow-orchestrator** - Guards Golden Rule, orchestrates 6-phase lifecycle
+- **🎯 workflow-orchestrator** - Guards (formerly) golden Rule, orchestrates 6-phase lifecycle
 - **🗂️ workspace-curator** - Indexes ADRs for persistent decision memory across sessions
 
 ## 📁 Project Structure
