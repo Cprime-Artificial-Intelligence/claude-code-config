@@ -28,38 +28,57 @@ if ! git rev-parse --git-dir > /dev/null 2>&1; then
     exit 0
 fi
 
-# Check if upstream remote exists
-if ! git remote | grep -q "^upstream$"; then
-    # No upstream configured - user might have forked
-    # Check if origin points to aaronsb's repo
-    ORIGIN_URL=$(git remote get-url origin 2>/dev/null)
-    if [[ "$ORIGIN_URL" != *"aaronsb/claude-code-config"* ]]; then
-        echo ""
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo "📦 Claude Code Config - Upstream Check"
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo ""
-        echo "It looks like you forked claude-code-config!"
-        echo ""
-        echo "To receive updates from the original repo, add it as upstream:"
-        echo "  cd ~/.claude"
-        echo "  git remote add upstream https://github.com/aaronsb/claude-code-config.git"
-        echo ""
-        echo "Then check for updates anytime with:"
-        echo "  git fetch upstream main"
-        echo "  git log HEAD..upstream/main --oneline"
-        echo ""
-        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-        echo ""
+# Read canonical upstream URL from config file
+CANONICAL_UPSTREAM=""
+if [ -f "$HOME/.claude/.canonical-upstream" ]; then
+    CANONICAL_UPSTREAM=$(cat "$HOME/.claude/.canonical-upstream" | tr -d '[:space:]')
+fi
+
+# Determine which remote to check
+ORIGIN_URL=$(git remote get-url origin 2>/dev/null)
+REMOTE_TO_CHECK=""
+REMOTE_NAME=""
+
+if git remote | grep -q "^upstream$"; then
+    # Upstream exists - this is a fork, check upstream
+    REMOTE_TO_CHECK="upstream"
+    REMOTE_NAME="upstream"
+elif [ -n "$CANONICAL_UPSTREAM" ] && [[ "$ORIGIN_URL" == "$CANONICAL_UPSTREAM"* ]]; then
+    # Origin points to canonical upstream - this is the original or a direct clone
+    REMOTE_TO_CHECK="origin"
+    REMOTE_NAME="origin"
+else
+    # Forked but no upstream configured
+    if [ -z "$CANONICAL_UPSTREAM" ]; then
+        # No canonical upstream file found - can't suggest what to add
+        exit 0
     fi
+
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "📦 Claude Code Config - Upstream Check"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "It looks like you forked claude-code-config!"
+    echo ""
+    echo "To receive updates from the canonical repo, add it as upstream:"
+    echo "  cd ~/.claude"
+    echo "  git remote add upstream $CANONICAL_UPSTREAM"
+    echo ""
+    echo "Then check for updates anytime with:"
+    echo "  git fetch upstream main"
+    echo "  git log HEAD..upstream/main --oneline"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
     exit 0
 fi
 
-# Fetch upstream quietly
-git fetch upstream main --quiet 2>/dev/null
+# Fetch remote quietly
+git fetch "$REMOTE_TO_CHECK" main --quiet 2>/dev/null
 
 # Check how many commits behind
-BEHIND=$(git rev-list --count HEAD..upstream/main 2>/dev/null)
+BEHIND=$(git rev-list --count HEAD.."$REMOTE_TO_CHECK"/main 2>/dev/null)
 
 if [ -z "$BEHIND" ]; then
     # Fetch failed or something went wrong
@@ -72,15 +91,15 @@ if [ "$BEHIND" -gt 0 ]; then
     echo "🔔 Claude Code Config - Updates Available"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    echo "Your configuration is $BEHIND commit(s) behind upstream."
+    echo "Your configuration is $BEHIND commit(s) behind $REMOTE_NAME."
     echo ""
     echo "Recent changes:"
-    git log HEAD..upstream/main --oneline --max-count=5 2>/dev/null | sed 's/^/  /'
+    git log HEAD.."$REMOTE_TO_CHECK"/main --oneline --max-count=5 2>/dev/null | sed 's/^/  /'
     echo ""
     echo "To update:"
     echo "  cd ~/.claude"
-    echo "  git log HEAD..upstream/main  # Review all changes"
-    echo "  git pull upstream main       # Pull updates"
+    echo "  git log HEAD..$REMOTE_TO_CHECK/main  # Review all changes"
+    echo "  git pull $REMOTE_TO_CHECK main       # Pull updates"
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
