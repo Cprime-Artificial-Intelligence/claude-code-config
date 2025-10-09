@@ -15,6 +15,15 @@
     "task-planner": "opus"
   },
   "hooks": {
-    "session-start": "/home/aaron/.claude/hooks/check-config-updates.sh"
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/home/aaron/.claude/hooks/check-config-updates.sh"
+          }
+        ]
+      }
+    ]
   }
 }
