@@ -1,8 +1,8 @@
 #!/bin/bash
-# Check if claude-code-config is out of date from upstream
+# Check if disciplined-methodology plugin has updates available
 # Runs once per day to avoid spam
 
-TIMESTAMP_FILE="$HOME/.claude/.last-update-check"
+TIMESTAMP_FILE="$HOME/.claude/.last-plugin-update-check"
 CURRENT_TIME=$(date +%s)
 ONE_DAY=86400
 
@@ -20,86 +20,44 @@ fi
 # Update timestamp
 echo "$CURRENT_TIME" > "$TIMESTAMP_FILE"
 
-# Only check if we're in the .claude directory
-cd "$HOME/.claude" 2>/dev/null || exit 0
-
-# Check if this is a git repo
-if ! git rev-parse --git-dir > /dev/null 2>&1; then
-    exit 0
-fi
-
-# Read canonical upstream URL from config file
-CANONICAL_UPSTREAM=""
-if [ -f "$HOME/.claude/.canonical-upstream" ]; then
-    CANONICAL_UPSTREAM=$(cat "$HOME/.claude/.canonical-upstream" | tr -d '[:space:]')
-fi
-
-# Determine which remote to check
-ORIGIN_URL=$(git remote get-url origin 2>/dev/null)
-REMOTE_TO_CHECK=""
-REMOTE_NAME=""
-
-if git remote | grep -q "^upstream$"; then
-    # Upstream exists - this is a fork, check upstream
-    REMOTE_TO_CHECK="upstream"
-    REMOTE_NAME="upstream"
-elif [ -n "$CANONICAL_UPSTREAM" ] && [[ "$ORIGIN_URL" == "$CANONICAL_UPSTREAM"* ]]; then
-    # Origin points to canonical upstream - this is the original or a direct clone
-    REMOTE_TO_CHECK="origin"
-    REMOTE_NAME="origin"
+# Get installed plugin version from plugin.json
+if [ -n "$CLAUDE_PLUGIN_ROOT" ] && [ -f "$CLAUDE_PLUGIN_ROOT/.claude-plugin/plugin.json" ]; then
+    INSTALLED_VERSION=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$CLAUDE_PLUGIN_ROOT/.claude-plugin/plugin.json" | cut -d'"' -f4)
 else
-    # Forked but no upstream configured
-    if [ -z "$CANONICAL_UPSTREAM" ]; then
-        # No canonical upstream file found - can't suggest what to add
-        exit 0
-    fi
-
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "📦 Claude Code Config - Upstream Check"
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
-    echo "It looks like you forked claude-code-config!"
-    echo ""
-    echo "To receive updates from the canonical repo, add it as upstream:"
-    echo "  cd ~/.claude"
-    echo "  git remote add upstream $CANONICAL_UPSTREAM"
-    echo ""
-    echo "Then check for updates anytime with:"
-    echo "  git fetch upstream main"
-    echo "  git log HEAD..upstream/main --oneline"
-    echo ""
-    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo ""
+    # Not running from plugin context, skip
     exit 0
 fi
 
-# Fetch remote quietly
-git fetch "$REMOTE_TO_CHECK" main --quiet 2>/dev/null
-
-# Check how many commits behind
-BEHIND=$(git rev-list --count HEAD.."$REMOTE_TO_CHECK"/main 2>/dev/null)
-
-if [ -z "$BEHIND" ]; then
-    # Fetch failed or something went wrong
+# Check for gh CLI
+if ! command -v gh &> /dev/null; then
+    # No gh CLI, can't check for updates
     exit 0
 fi
 
-if [ "$BEHIND" -gt 0 ]; then
+# Get latest GitHub release version
+LATEST_VERSION=$(gh api repos/aaronsb/claude-code-config/releases/latest --jq '.tag_name' 2>/dev/null | tr -d 'v')
+
+if [ -z "$LATEST_VERSION" ]; then
+    # Failed to fetch latest version
+    exit 0
+fi
+
+# Compare versions (simple string comparison, works for semver)
+if [ "$INSTALLED_VERSION" != "$LATEST_VERSION" ]; then
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "🔔 Claude Code Config - Updates Available"
+    echo "🔔 Plugin Update Available"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
-    echo "Your configuration is $BEHIND commit(s) behind $REMOTE_NAME."
-    echo ""
-    echo "Recent changes:"
-    git log HEAD.."$REMOTE_TO_CHECK"/main --oneline --max-count=5 2>/dev/null | sed 's/^/  /'
+    echo "Disciplined Methodology Plugin"
+    echo "  Current: v$INSTALLED_VERSION"
+    echo "  Latest:  v$LATEST_VERSION"
     echo ""
     echo "To update:"
-    echo "  cd ~/.claude"
-    echo "  git log HEAD..$REMOTE_TO_CHECK/main  # Review all changes"
-    echo "  git pull $REMOTE_TO_CHECK main       # Pull updates"
+    echo "  /plugin update disciplined-methodology"
+    echo ""
+    echo "Release notes:"
+    echo "  https://github.com/aaronsb/claude-code-config/releases/tag/v$LATEST_VERSION"
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
