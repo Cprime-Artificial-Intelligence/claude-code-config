@@ -49,7 +49,7 @@ Use the built-in specialized subagents to implement the disciplined methodology.
 ### Agent Coordination Protocol
 
 1. **Phase-Based Usage**: Each agent specializes in specific lifecycle phases
-2. **Golden Rule Enforcement**: All agents respect the "no code without active sub-task" rule
+2. **Task-first rule**: All agents respect the "no code without active sub-task" rule
 3. **Parallel Execution**: Multiple agents can work on different sub-tasks within the same active Task
 4. **Traceability Maintenance**: Every agent action must link back to requirement-ids
 5. **Cross-Agent Communication**: Agents coordinate through the shared methodology and file system
