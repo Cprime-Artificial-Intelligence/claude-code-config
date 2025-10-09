@@ -1,14 +1,15 @@
 {
-  "name": "Disciplined Methodology Marketplace",
+  "name": "disciplined-methodology-marketplace",
   "description": "Plugin marketplace for disciplined software engineering methodology",
   "version": "1.0.0",
+  "owner": "aaronsb",
   "plugins": [
     {
       "name": "disciplined-methodology",
       "displayName": "Disciplined Software Engineering Methodology",
       "description": "A rigorous software engineering methodology featuring 7 specialized subagents, phase-gated workflows, and security safeguards. Enforces requirements-driven development with user stories, Architecture Decision Records (ADRs), and task-first rule.",
       "version": "1.0.0",
-      "source": ".",
+      "source": "./",
       "author": {
         "name": "Aaron Bockelie",
         "url": "https://github.com/aaronsb"
