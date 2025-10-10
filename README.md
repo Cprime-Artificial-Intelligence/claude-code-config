@@ -1,6 +1,22 @@
-# Claude Code Configuration
+# Disciplined Software Engineering Methodology - Claude Code Plugin
 
-A disciplined software engineering configuration for Claude Code featuring specialized subagents, methodology enforcement, and security safeguards.
+A disciplined software engineering plugin for Claude Code featuring specialized subagents, methodology enforcement, and security safeguards.
+
+## Installation
+
+### Via Marketplace (Recommended)
+```bash
+# Add the marketplace
+/plugin marketplace add aaronsb/claude-plugins-marketplace
+
+# Install the plugin
+/plugin install disciplined-methodology
+```
+
+### Direct Install
+```bash
+/plugin install aaronsb/claude-code-config
+```
 
 ## 🏗️ Architecture
 
@@ -114,9 +130,39 @@ curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/claude-code-config/mai
 - **Automated rule refresh** via hooks
 - **Security-first** approach with secret detection
 
+## 🔧 Plugin Development
+
+This is a Claude Code plugin distributed via the [aaronsb/claude-plugins-marketplace](https://github.com/aaronsb/claude-plugins-marketplace).
+
+**Repository Structure:**
+- This repo (`claude-code-config`) = The plugin source code
+- Marketplace repo = References this as a git submodule
+
+**To update the marketplace after changes:**
+```bash
+cd ~/path/to/claude-plugins-marketplace/disciplined-methodology
+git pull origin main
+cd ..
+git add disciplined-methodology
+git commit -m "chore: Update plugin to latest version"
+git push
+```
+
+**Plugin Structure:**
+```
+.claude-plugin/
+  plugin.json          # Plugin metadata
+agents/                # 7 specialized subagents
+hooks/                 # SessionStart hook for version checking
+  hooks.json           # Hook configuration
+  check-config-updates.sh
+methodology/           # Documentation
+settings.json          # Plugin defaults (agent model overrides)
+```
+
 ## 🤝 Contributing
 
-This configuration evolves through the **Self-Improving Claude Reflection** process - Claude can suggest improvements to its own methodology based on user feedback and project outcomes.
+This plugin evolves through user feedback and practical application. Suggestions and improvements welcome!
 
 ## 📄 License
 
@@ -124,4 +170,4 @@ MIT License - Use this methodology to build better software with disciplined AI 
 
 ---
 
-*🤖 Generated with disciplined software engineering methodology*
+*🤖 Built with disciplined software engineering methodology*
