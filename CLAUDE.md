@@ -118,6 +118,63 @@ Use conventional commit format:
 Simple check: `gh repo view` succeeds → use GitHub
 No GitHub? Use git commits + optional `.claude/notes.md`
 
+### GitHub Command Patterns
+
+**Trigger words that mean "check GitHub first":**
+- "issue", "issues" → search GitHub issues before files
+- "PR", "pull request" → use `gh pr` commands
+- "review", "comments" → check PR reviews/comments
+- "checks", "CI", "tests failing" → check PR status/checks
+
+**Common workflow operations:**
+
+**Finding issues:**
+```bash
+# User says: "find the security issue" or "we have an issue about X"
+gh issue list --search "security"           # Search by keyword
+gh issue list --label bug                   # Filter by label
+gh issue view 123                           # Read specific issue
+```
+
+**Creating ADR PRs:**
+```bash
+# After drafting ADR in docs/adr/
+gh pr create --title "ADR-003: Decision Title" \
+  --body "## Context\n\n## Decision\n\n## Consequences"
+```
+
+**Checking PR status:**
+```bash
+gh pr view                                  # Current branch PR
+gh pr view 42                               # Specific PR number
+gh pr checks                                # CI/test status
+gh pr view --comments                       # Read review comments
+```
+
+**Creating implementation PRs:**
+```bash
+# After implementing changes
+gh pr create --title "feat: Implement feature X" \
+  --body "Implements ADR-003\n\n## Changes\n- Item 1\n- Item 2"
+```
+
+**Pattern: Always try GitHub first**
+```bash
+# 1. Check if GitHub is available
+gh repo view > /dev/null 2>&1
+
+# 2. If success, use gh commands for issues/PRs
+# 3. If fail, fall back to file search
+```
+
+**Example flow:**
+```
+User: "Find the API security issue we wrote"
+→ Run: gh issue list --search "API security"
+→ If found: Read issue with gh issue view N
+→ If gh fails: Search files for "API security"
+```
+
 ## Documentation Organization
 
 The `docs/` directory supports flexible organization:
