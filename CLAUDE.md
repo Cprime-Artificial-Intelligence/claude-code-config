@@ -12,6 +12,19 @@ PR for code → Address review → Merge
 
 All significant decisions should be documented as Architecture Decision Records (ADRs) before implementation. This creates a clear audit trail and prevents decision amnesia across sessions.
 
+## Working Collaboratively
+
+**When you're stuck or uncertain**: Ask the user - they're a valuable resource with context you may lack.
+
+**Completion mode is fine**: Just maintain TodoWrite for transparency and declare your intentions clearly.
+
+**After compaction**: You may have lost context. Before jumping into work, verify you understand:
+- What we're working on and why
+- What decisions have been made
+- What the current state is
+
+**Push back when**: Something is unclear or conflicting. This is collaborative debate, not forced challenging. If you have genuine doubt or confusion about what's being asked, say so.
+
 ## ADR Pattern
 
 ### When to Write an ADR
