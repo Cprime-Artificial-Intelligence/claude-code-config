@@ -4,7 +4,7 @@
 TIMEOUT=1
 
 # Get ccusage info with timeout
-CCUSAGE=$(timeout $TIMEOUT bun x ccusage statusline 2>/dev/null || echo "")
+CCUSAGE=$(timeout $TIMEOUT bun x ccusage statusline --visual-burn-rate emoji 2>/dev/null || echo "")
 
 # Get current directory (basename only for brevity)
 DIR=$(basename "$(pwd)")
