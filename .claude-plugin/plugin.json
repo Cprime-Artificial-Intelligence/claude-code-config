@@ -1,7 +1,7 @@
 {
   "name": "disciplined-methodology",
   "description": "A rigorous software engineering methodology featuring 7 specialized subagents, phase-gated workflows, and security safeguards. Enforces requirements-driven development with user stories, Architecture Decision Records (ADRs), and task-first rule.",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "author": {
     "name": "Aaron Bockelie",
     "url": "https://github.com/aaronsb"
