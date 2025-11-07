@@ -1,7 +1,7 @@
 {
   "name": "disciplined-methodology",
   "description": "ADR-driven software engineering methodology featuring 6 specialized subagents, GitHub-first collaboration with local fallback, SOLID principles enforcement, and collaborative guidance. Debate → Draft ADR → PR → Implement → Review → Merge.",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "author": {
     "name": "Aaron Bockelie",
     "url": "https://github.com/aaronsb"
