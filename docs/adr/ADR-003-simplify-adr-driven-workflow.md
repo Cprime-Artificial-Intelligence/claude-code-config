@@ -1,6 +1,6 @@
 # ADR-003: Simplify to ADR-Driven Workflow Pattern
 
-Status: Proposed
+Status: Reviewed - Ready for Implementation
 Date: 2025-01-06
 Deciders: @aaronsb, @claude
 Tags: #architecture #methodology #workflow #simplification
@@ -40,6 +40,18 @@ Debate/Research → Draft ADR (docs/adr/) → PR for ADR →
 Branch (reference ADR) → TodoWrite (session) → Implement →
 PR for code → Address review → Merge
 ```
+
+**Documentation Organization:**
+The `docs/` directory should support flexible organization beyond just ADRs:
+- `docs/adr/` - Architecture Decision Records (ADR-NNN-description.md format)
+- `docs/development/` - Development guides, setup instructions
+- `docs/research/` - Research findings, spike reports
+- `docs/guides/` - User guides, tutorials
+- `docs/testing/` - Test strategies, QA documentation
+- `docs/features/` - Feature specifications, user stories
+- Other subdirectories as needed for project context
+
+Agents should understand this flexible structure and organize documentation appropriately.
 
 ### 3. Expose Methodology to Main Claude
 - **Add**: `CLAUDE.md` at plugin root with core workflow patterns
@@ -138,24 +150,24 @@ Target reductions:
 3. Update `quality-guidelines.md` if needed
 4. Create ADR template file
 
-### Phase 3: Migration & Testing
-1. Test with new projects (no migration needed)
-2. Document migration path for existing projects using old structure
-3. Update plugin README with new workflow
-4. Version bump to 2.0.0 (breaking change)
+### Phase 3: Testing & Documentation
+1. Test with new projects (clean slate approach)
+2. Update plugin README with new workflow
+3. Version bump to 2.0.0 (breaking change - no backward compatibility)
 
 ### Phase 4: Polish
 1. Gather user feedback
 2. Refine agent prompts based on real usage
 3. Update examples and documentation
 
-## Open Questions
+## Decisions from PR Review
 
-1. **CLAUDE.md scope**: Should it be 100 lines (essentials) or 150 lines (more detail)?
-2. **ADR storage location**: `docs/adr/` or `docs/decisions/` or flexible?
-3. **Migration support**: Should we provide migration scripts for existing projects?
-4. **Backward compatibility**: Should we maintain any backward compatibility, or clean break?
-5. **User customization**: How should users extend/override the methodology in their projects?
+1. **CLAUDE.md scope**: Up to 150 lines is acceptable - minimum viable content. Beyond that becomes too detailed.
+2. **ADR storage location**: Use `docs/adr/ADR-NNN-description-of-thing.md` format
+3. **Migration support**: No migration scripts needed - clean break approach
+4. **Backward compatibility**: No backward compatibility - version 2.0.0 breaking change
+5. **User customization**: Users customize by editing their project's CLAUDE.md file directly
+6. **Documentation flexibility**: Support multiple `docs/` subdirectories (development, research, guides, testing, features, etc.)
 
 ## References
 
