@@ -1,6 +1,6 @@
-# Disciplined Methodology - ADR-Driven Development
+# ADR-Driven Development Config
 
-This plugin provides ADR-driven software engineering methodology with GitHub-first collaboration.
+ADR-driven workflow with GitHub-first collaboration.
 
 **Instructions are injected via hooks, not this file.**
 

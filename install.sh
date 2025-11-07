@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Claude Code Configuration Installer
-# Installs disciplined methodology directly to ~/.claude/
+# Installs ADR-driven dev config directly to ~/.claude/
 
 set -e
 

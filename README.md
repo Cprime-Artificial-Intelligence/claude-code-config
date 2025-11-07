@@ -1,6 +1,6 @@
-# Disciplined Software Engineering Methodology for Claude Code
+# Claude Code Development Config
 
-ADR-driven development methodology with specialized subagents, GitHub-first collaboration, and hook-based instruction injection.
+ADR-driven workflow with specialized subagents, GitHub-first patterns, and hook-based instruction injection.
 
 ## 🚀 Installation
 
@@ -214,7 +214,7 @@ This methodology evolves through practical use. Found a pattern that works? Open
 
 ## 📄 License
 
-MIT License - Use this to build better software with disciplined AI assistance.
+MIT License - Build better software with Claude Code.
 
 ---
 

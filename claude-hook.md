@@ -1,8 +1,8 @@
-# Disciplined Methodology - ADR-Driven Development
+# ADR-Driven Development Workflow
 
 ## Core Workflow Pattern
 
-The fundamental workflow for disciplined software development:
+The fundamental workflow:
 
 ```
 Debate/Research → Draft ADR (docs/adr/) → PR for ADR →
