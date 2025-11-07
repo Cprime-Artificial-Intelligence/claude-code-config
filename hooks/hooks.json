@@ -1,14 +1,20 @@
 {
-  "description": "Checks for configuration updates on session start",
+  "description": "Injects methodology instructions at critical moments and checks for updates",
   "hooks": {
     "SessionStart": [
       {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/check-config-updates.sh"
-          }
-        ]
+        "type": "command",
+        "command": "cat ${CLAUDE_PLUGIN_ROOT}/claude-hook.md"
+      },
+      {
+        "type": "command",
+        "command": "${CLAUDE_PLUGIN_ROOT}/hooks/check-config-updates.sh"
+      }
+    ],
+    "PreCompact": [
+      {
+        "type": "command",
+        "command": "cat ${CLAUDE_PLUGIN_ROOT}/claude-hook.md"
       }
     ]
   }
