@@ -1,12 +1,15 @@
 {
-  "SessionStart": [
-    {
-      "hooks": [
-        {
-          "type": "command",
-          "command": "${CLAUDE_PLUGIN_ROOT}/hooks/check-config-updates.sh"
-        }
-      ]
-    }
-  ]
+  "description": "Checks for configuration updates on session start",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/check-config-updates.sh"
+          }
+        ]
+      }
+    ]
+  }
 }
