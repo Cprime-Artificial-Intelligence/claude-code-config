@@ -1,173 +1,221 @@
-# Disciplined Software Engineering Methodology - Claude Code Plugin
+# Disciplined Software Engineering Methodology for Claude Code
 
-A disciplined software engineering plugin for Claude Code featuring specialized subagents, methodology enforcement, and security safeguards.
+ADR-driven development methodology with specialized subagents, GitHub-first collaboration, and hook-based instruction injection.
 
-## Installation
+## 🚀 Installation
 
-### Via Marketplace (Recommended)
+### One-liner Install
+
 ```bash
-# Add the marketplace
-/plugin marketplace add aaronsb/claude-plugins-marketplace
-
-# Install the plugin
-/plugin install disciplined-methodology
+curl -fsSL https://raw.githubusercontent.com/aaronsb/claude-code-config/main/install.sh | bash
 ```
 
-### Direct Install
+Or with wget:
 ```bash
-/plugin install aaronsb/claude-code-config
+wget -qO- https://raw.githubusercontent.com/aaronsb/claude-code-config/main/install.sh | bash
 ```
+
+### What It Does
+
+- Clones to temporary directory
+- Copies everything (including .git) to `~/.claude/`
+- Sets up hooks, agents, and methodology files
+- Enables future updates via `git pull` from `~/.claude/`
+
+### Manual Installation
+
+```bash
+git clone https://github.com/aaronsb/claude-code-config /tmp/claude-install
+cd /tmp/claude-install
+./install.sh
+```
+
+### Updating
+
+Since `.git` is installed to `~/.claude/`, you can update anytime:
+
+```bash
+cd ~/.claude && git pull
+```
+
+## 📋 What's Included
+
+### Core Methodology
+- **ADR-driven workflow**: Debate → Draft ADR → PR → Implement → Review → Merge
+- **Hook-based instruction injection**: Fresh context on SessionStart and PreCompact
+- **GitHub-first patterns**: Automatic `gh` command usage for issues/PRs
+
+### 6 Specialized Subagents
+
+- **requirements-analyst** - Capture complex requirements as GitHub issues
+- **system-architect** - Draft ADRs, evaluate SOLID principles
+- **task-planner** - Plan complex multi-branch implementations
+- **code-reviewer** - Review large PRs, SOLID compliance checks
+- **workflow-orchestrator** - Project status, phase coordination
+- **workspace-curator** - Organize docs/, manage .claude/ directory
+
+### GitHub Command Patterns
+
+When you say "we have an issue about X", Claude will:
+1. Detect GitHub-related trigger words
+2. Run `gh issue list --search "X"`
+3. Fall back to file search only if GitHub isn't available
+
+**Trigger words**: issue, PR, pull request, review, comments, checks
+
+### Collaborative Guidance
+
+- Ask when stuck (you're a valuable resource)
+- Verify context after compaction
+- Push back when unclear (collaborative debate, not forced challenging)
+- Acknowledge uncertainty directly
 
 ## 🏗️ Architecture
 
-This configuration implements a **disciplined software engineering methodology** that mirrors real development teams through specialized subagents and strict process enforcement.
+### Files Installed to ~/.claude/
 
-### Task-first rule
-> **No code change is permissible unless it originates from an active sub-task**
-
-All implementation work must trace back through: `requirements.md` → `design.md` → `tasks.md` → active sub-task
-
-## 🤖 Specialized Subagents
-
-Your AI development team includes:
-
-- **🔍 requirements-analyst** - Translates needs into "As a/I want/So that" user stories with testable acceptance criteria
-- **🏗️ system-architect** - Creates design.md with ADR format, enforces SOLID principles
-- **📋 task-planner** - Decomposes Tasks into Sub-tasks with requirement traceability
-- **👀 code-reviewer** - Enforces SOLID principles, prevents monolithic patterns
-- **🐙 github-project-manager** - Masters GitHub CLI for issue/milestone tracking
-- **🎯 workflow-orchestrator** - Enforces task-first rule, orchestrates 6-phase lifecycle
-- **🗂️ workspace-curator** - Maintains organized workspace structure and prevents documentation sprawl
-
-## 📁 Project Structure
-
-Supports both **local files** and **GitHub integration**:
-
-### Local File Method
 ```
-project-root/
-├── requirements.md     # User stories index
-├── design.md          # Architecture decisions
-├── tasks.md           # Implementation plan
-├── docs/adr/          # Architecture Decision Records
-├── .claude/           # Configuration and hooks
-└── src/               # Code follows tasks.md
+~/.claude/
+├── claude-hook.md          # Full methodology instructions (injected via hooks)
+├── CLAUDE.md              # Minimal marker (not auto-loaded)
+├── agents/                # 6 specialized subagents
+│   ├── code-reviewer.md
+│   ├── requirements-analyst.md
+│   ├── system-architect.md
+│   ├── task-planner.md
+│   ├── workflow-orchestrator.md
+│   └── workspace-curator.md
+├── hooks/
+│   ├── hooks.json         # SessionStart, PreCompact injection
+│   └── check-config-updates.sh
+├── commands/              # Custom slash commands
+├── methodology/           # Documentation and guides
+├── scripts/               # Utility scripts
+└── statusline.sh          # Status line with git branch info
 ```
 
-### GitHub Method  
-- **Issues** with `requirement` label = User stories
-- **Wiki/Discussions** = Design decisions  
-- **Milestones** = Tasks, **Issues** with `task` label = Sub-tasks
+### Why Hook-Based Injection?
 
-## 🔒 Security Features
+**Problem**: CLAUDE.md instructions get ignored as context grows ([reported issues](https://github.com/anthropics/claude-code/issues/6120))
 
-- **Pre-commit hooks** prevent secrets (API keys, tokens, high-entropy strings)
-- **Entropy analysis** catches potential leaked credentials
-- **Pattern detection** for common secret formats (OpenAI, GitHub, AWS, etc.)
-- **Smart gitignore** excludes sensitive data and conversation history
+**Solution**: Inject instructions via hooks at critical moments:
+- **SessionStart**: Fresh context when sessions begin
+- **PreCompact**: Fresh context after compaction events
 
-## 🚀 Quick Start
+Instructions arrive as active conversation content, not distant system prompts.
 
-### Installation
+## 🔧 Configuration
 
-#### Option 1: From forked repository (recommended)
+### Status Line (Optional)
+
+Enable status line in `~/.claude/settings.json`:
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "${HOME}/.claude/statusline.sh"
+  }
+}
+```
+
+Shows: `📁 directory 🔀 branch | API usage`
+
+### Hooks
+
+Hooks are auto-configured in `~/.claude/hooks/hooks.json`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {"type": "command", "command": "cat ${HOME}/.claude/claude-hook.md"}
+    ],
+    "PreCompact": [
+      {"type": "command", "command": "cat ${HOME}/.claude/claude-hook.md"}
+    ]
+  }
+}
+```
+
+## 📚 Usage
+
+### Start Working
+
+1. **Restart Claude Code** after installation
+2. **Try `/agents`** - see your specialized team
+3. **Say "we have an issue about X"** - watch it check GitHub first!
+
+### ADR Workflow
+
+```
+1. Debate/Research the problem
+2. Draft ADR in docs/adr/ADR-NNN-title.md
+3. Create PR for ADR review
+4. Merge when accepted
+5. Create branch referencing ADR
+6. Use TodoWrite to track implementation
+7. Create PR for code
+8. Review and merge
+```
+
+### Working with GitHub
+
 ```bash
-# Replace YOUR_USERNAME with your GitHub username
-git clone https://github.com/YOUR_USERNAME/claude-code-config.git ~/.claude
-cd ~/.claude && ./install.sh
+# Find issues
+"we have an issue about API security"
+→ Claude runs: gh issue list --search "API security"
+
+# Check PR status
+"what's the status of PR 42?"
+→ Claude runs: gh pr view 42
+
+# Review PR
+"show me comments on the auth PR"
+→ Claude runs: gh pr view --comments
 ```
 
-#### Option 2: Remote install with environment variable  
-```bash
-# Set your repository URL
-export CLAUDE_CONFIG_REPO="https://github.com/YOUR_USERNAME/claude-code-config.git"
-curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/claude-code-config/main/install.sh | bash
-```
+## 🎯 Key Features
 
-#### Option 3: Interactive install
-```bash
-# The installer will prompt for repository URL if not detected
-curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/claude-code-config/main/install.sh | bash
-```
+### SOLID Principles Enforcement
+- Single Responsibility: One reason to change
+- Open/Closed: Open for extension, closed for modification
+- Liskov Substitution: Subtypes substitutable for base types
+- Interface Segregation: Many specific > one general interface
+- Dependency Inversion: Depend on abstractions, not concretions
 
-### Usage
+### Code Quality Flags
+- Files > 500 lines → consider splitting
+- Functions > 3 nesting levels → extract methods
+- Classes > 7 public methods → consider decomposition
+- Functions > 30-50 lines → refactor for clarity
 
-1. **Start Claude Code** in any project directory
-2. **Auto-detection** determines tracking method (local files vs GitHub)
-3. **Use specialized agents** via `/agents` command
-4. **Follow the methodology**:
-   - Capture requirements first
-   - Stabilize design decisions
-   - Plan implementation tasks
-   - Execute with active sub-tasks only
+### Communication Standards
+- Acknowledge uncertainty: "I don't know" over confident guesses
+- Avoid absolutes: "comprehensive", "absolutely right"
+- Present options with trade-offs, not just solutions
+- Be direct about problems and limitations
 
-## 📚 Key Files
+## 🐛 Known Issues
 
-| File | Purpose |
-|------|---------|
-| `CLAUDE.md` | Core methodology and agent coordination rules |
-| `agents/` | 7 specialized subagent definitions |
-| `commands/` | Custom slash commands |
-| `hooks/` | Git hooks and automation scripts |
-| `.gitignore` | Excludes sensitive data and history |
+### Claude Code Plugin System
 
-## 🛠️ Methodology Phases
+The plugin marketplace is new (Oct 2025) and has significant issues:
+- Git submodules not initialized on install
+- CLAUDE.md instructions ignored
+- Agents not registering properly
+- Version updates unreliable
 
-1. **Detect Tracking Method** - Auto-choose local files vs GitHub
-2. **Capture Requirements** - User stories with acceptance criteria
-3. **Design Phase** - Architecture decisions with ADR format
-4. **Plan Implementation** - Task decomposition with traceability
-5. **Execute** - Code only with active sub-tasks (task-first rule!)
-6. **Review & Close** - Validate acceptance criteria
-
-## ⚡ Features
-
-- **SOLID Principles** enforcement across all code
-- **Anti-monolith** patterns (file size limits, nesting limits, etc.)
-- **Requirement traceability** from user story to implementation
-- **Parallel sub-task execution** within single active Task
-- **GitHub CLI integration** for issue/project management
-- **Automated rule refresh** via hooks
-- **Security-first** approach with secret detection
-
-## 🔧 Plugin Development
-
-This is a Claude Code plugin distributed via the [aaronsb/claude-plugins-marketplace](https://github.com/aaronsb/claude-plugins-marketplace).
-
-**Repository Structure:**
-- This repo (`claude-code-config`) = The plugin source code
-- Marketplace repo = References this as a git submodule
-
-**To update the marketplace after changes:**
-```bash
-cd ~/path/to/claude-plugins-marketplace/disciplined-methodology
-git pull origin main
-cd ..
-git add disciplined-methodology
-git commit -m "chore: Update plugin to latest version"
-git push
-```
-
-**Plugin Structure:**
-```
-.claude-plugin/
-  plugin.json          # Plugin metadata
-agents/                # 7 specialized subagents
-hooks/                 # SessionStart hook for version checking
-  hooks.json           # Hook configuration
-  check-config-updates.sh
-methodology/           # Documentation
-settings.json          # Plugin defaults (agent model overrides)
-```
+**We abandoned plugins** in favor of direct `~/.claude/` installation. Works better, simpler, no headaches.
 
 ## 🤝 Contributing
 
-This plugin evolves through user feedback and practical application. Suggestions and improvements welcome!
+This methodology evolves through practical use. Found a pattern that works? Open an issue or PR!
 
 ## 📄 License
 
-MIT License - Use this methodology to build better software with disciplined AI assistance.
+MIT License - Use this to build better software with disciplined AI assistance.
 
 ---
 
-*🤖 Built with disciplined software engineering methodology*
+*Built with the hook-based instruction injection approach that actually works* 🎯
