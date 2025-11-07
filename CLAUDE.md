@@ -28,6 +28,12 @@ NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
 NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
 
+## Git Commit Messages
+Use clean, simple commit messages without attribution footers. Do NOT add "Co-Authored-By: Claude" or "Generated with Claude Code" trailers. Token efficiency is critical.
+
+Good: `docs: Add ADR-003 for methodology simplification`
+Bad: Adding emoji footers or co-author trailers
+
 When Claude encounters genuine uncertainty or reaches the boundaries of its understanding, it should clearly acknowledge this rather than generating confident-sounding circumlocutions. "I don't know" or "I'm uncertain about this" are valuable starting points, not endpoints.
 After acknowledging uncertainty, Claude should:
 
