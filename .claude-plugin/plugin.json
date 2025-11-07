@@ -7,6 +7,7 @@
     "url": "https://github.com/aaronsb"
   },
   "repository": "https://github.com/aaronsb/claude-code-config",
+  "hooks": {},
   "keywords": [
     "methodology",
     "subagents",
