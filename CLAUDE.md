@@ -120,8 +120,13 @@ No GitHub? Use git commits + optional `.claude/notes.md`
 
 ### GitHub Command Patterns
 
+**IMPORTANT: When user says "we have an issue" or mentions "issue":**
+1. **First, ask for clarification** if context is ambiguous: "Do you mean a GitHub issue, or a problem we need to solve?"
+2. If clearly a GitHub issue → run `gh issue list --search "keyword"`
+3. If clearly a problem → proceed with investigation
+
 **Trigger words that mean "check GitHub first":**
-- "issue", "issues" → search GitHub issues before files
+- "issue", "issues" → search GitHub issues (ask if ambiguous)
 - "PR", "pull request" → use `gh pr` commands
 - "review", "comments" → check PR reviews/comments
 - "checks", "CI", "tests failing" → check PR status/checks
