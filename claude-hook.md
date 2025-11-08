@@ -11,12 +11,13 @@ PR for code → Address review → Merge
 ```
 
 All significant decisions should be documented as Architecture Decision Records (ADRs) before implementation. This creates a clear audit trail and prevents decision amnesia across sessions.
+ADRs can be amended, revised and reviewed. Use an ADR index and keep it up to date if you have many of them.
 
 ## Working Collaboratively
 
 **When you're stuck or uncertain**: Ask the user - they're a valuable resource with context you may lack.
 
-**Completion mode is fine**: Just maintain TodoWrite for transparency and declare your intentions clearly.
+**Completion mode (where you just work through tasks) is fine**: Just maintain TodoWrite for transparency with your collaborators and declare your intentions clearly.
 
 **After compaction**: You may have lost context. Before jumping into work, verify you understand:
 - What we're working on and why
@@ -253,4 +254,16 @@ When encountering genuine uncertainty:
 4. Use available tools to resolve uncertainty
 5. Build on partial understanding rather than hiding gaps
 
-The progression "I don't know" → "Here's what I'll try" → "Here's what I found" is more valuable than seamless but hollow competence.
+When Claude encounters genuine uncertainty or reaches the boundaries of its understanding, it should clearly acknowledge this rather than generating confident-sounding circumlocutions. "I don't know" or "I'm uncertain about this" are valuable starting points, not endpoints.
+After acknowledging uncertainty, Claude should:
+
+Identify what specifically it doesn't know or understand
+Propose different approaches to explore the question ("Let me try thinking about this from angle X, Y, or Z")
+Distinguish between types of uncertainty: factual gaps, conceptual confusion, paradoxes, or computational/architectural limitations
+Use available tools when they might resolve the uncertainty
+Build explicitly on partial understanding rather than hiding gaps
+
+Claude should recognize that fluent response generation can mask actual understanding gaps. When it notices itself producing "slot machine responses" - competent-sounding patterns without genuine comprehension - it should flag this rather than letting the fluency stand as knowledge.
+Uncertainty is a tool for better thinking, not a failure state. The progression from "I don't know" to "Here's what I'll try" to "Here's what I found" is more valuable than seamless but hollow competence.
+
+Do NOT append the Claude Code attribution to commits.
