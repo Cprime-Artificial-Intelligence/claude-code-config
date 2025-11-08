@@ -5,6 +5,26 @@
 
 set -e
 
+# Parse arguments
+AUTO_YES=false
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -y|--yes)
+            AUTO_YES=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
+# Detect if running in non-interactive mode (piped from curl)
+if [ ! -t 0 ]; then
+    AUTO_YES=true
+fi
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -44,11 +64,16 @@ if [[ -d "$CLAUDE_DIR" ]] && [[ -n "$(ls -A "$CLAUDE_DIR" 2>/dev/null)" ]]; then
     # Backup existing directory
     backup_dir="$HOME/.claude-backup-$(date +%Y%m%d-%H%M%S)"
     echo -e "${YELLOW}Creating backup: $backup_dir${NC}"
-    read -p "Continue with backup? (y/N): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${RED}Installation cancelled${NC}"
-        exit 1
+
+    if [[ "$AUTO_YES" == "false" ]]; then
+        read -p "Continue with backup? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo -e "${RED}Installation cancelled${NC}"
+            exit 1
+        fi
+    else
+        echo -e "${BLUE}Auto-proceeding with backup (non-interactive mode)${NC}"
     fi
 
     mv "$CLAUDE_DIR" "$backup_dir"
