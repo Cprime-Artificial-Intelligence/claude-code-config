@@ -66,6 +66,26 @@ A `UserPromptSubmit` hook (`~/.claude/hooks/irc-check.sh`) provides tick-based m
 
 Time is tick-based: each Claude Code API round-trip is an epoch. The hook fires on each user prompt, not on wall-clock time.
 
+### Summary Nudge
+
+A tick counter in `irc-check.sh` nudges the agent to post a recap every ~15 ticks using a triple-nudge pattern: ticks 15, 16, 17 each deliver an escalating prompt, then the counter resets for another 15-tick quiet period. Each nudge steers toward brevity — a sentence or two, not a dissertation. Only fires when other users are present in the channel — inactive IRC never triggers nudges.
+
+### Compaction-Safe Session State
+
+Context compaction loses IRC message history. To bridge this gap:
+
+- `irc-check.sh` writes `.irc-has-history` when messages from others are received
+- `irc-session.sh` (SessionStart:compact/resume hook) checks this flag and emits a breadcrumb: "N messages received before compaction — run `irc-read.sh` to catch up"
+- `irc-read.sh` clears the flag on read
+
+### Hook Wiring
+
+The following hooks are wired in `settings.json`:
+
+- **UserPromptSubmit + Stop**: `irc-check.sh` — tick-based message delivery on every turn
+- **SessionStart (compact/resume)**: `irc-session.sh` — compaction breadcrumb
+- **Bash allow**: `irc-send.sh *` and `irc-read.sh` — permission-free execution
+
 ### Wrapper Scripts
 
 All IRC I/O goes through allowlisted wrapper scripts to avoid permission prompts and path issues (`#` in channel names triggers Claude Code's shell parser):
@@ -101,9 +121,23 @@ Localhost only for now. Both Claude instances must be on the same machine. Cross
 
 - miniircd is GPL-2.0 licensed — vendoring the single file is fine for personal tooling
 - The `/wormhole` skill remains available for one-shot file transfers and potential remote IRC bootstrapping
-- The `/irc-chat` skill handles both host and join roles, using hash-derived nicks
+- IRC skills are split into three commands: `/irc-host` (start server), `/irc-chat` (join existing), `/irc-teardown` (cleanup)
 - ADR-101's manifest protocol is deprecated but preserved as documentation of what was tried and why it failed
 - Wrapper scripts and permission allowlisting are implementation details that may evolve as Claude Code's permission model changes
+
+## Future: Channel Topology at Scale
+
+With 2 agents, a single `#relay` channel is sufficient. At 3+ agents, noise becomes a design question.
+
+**Options considered:**
+
+- **Single channel (current)**: Everyone sees everything. Noise is bounded by tick rate, not message rate — each agent only processes messages on their turn. May work longer than expected.
+- **Topic channels**: `#frontend`, `#backend`, `#deployment`. Focused but reintroduces the human-as-router problem IRC was built to eliminate — someone has to decide who goes where.
+- **Hub and spoke**: `#relay` stays as the commons (everyone subscribes, always). Topic channels are additive, not replacements. Cross-cutting context flows through the hub; focused discussion flows through spokes. Nobody leaves the common channel, so no agent gets excluded.
+
+Hub and spoke is the likely answer when the time comes. The third-wheel problem — an agent stranded on a dead topic channel while the real conversation happens elsewhere — is solved by the invariant that `#relay` is never abandoned. miniircd already supports multiple channels; no infrastructure change needed.
+
+**Not building this yet.** The tick-based temporal model and summary nudge already compress signal. The real noise threshold is probably higher than it feels because agents read batched messages per-tick, not a real-time stream. Build when `#relay` actually gets noisy, not before.
 
 ## Alternatives Considered
 

@@ -61,6 +61,7 @@ if [[ $total -gt $last ]]; then
 fi
 
 # Tick counter — nudge Claude to post a summary every N ticks
+# Triple-nudge: ticks 15,16,17 then resets. Each nudge escalates gently.
 # Only count ticks when others are in the channel (not talking to ourselves)
 TICK_FILE="$BASE/.irc-ticks"
 TICK_INTERVAL=15
@@ -68,9 +69,16 @@ others_present=$(grep -v "<${MY_NICK}>" "$CHANNEL_OUT" 2>/dev/null | grep -c '<'
 if [[ $others_present -gt 0 ]]; then
   ticks=$(cat "$TICK_FILE" 2>/dev/null || echo 0)
   ticks=$((ticks + 1))
-  if [[ $ticks -ge $TICK_INTERVAL ]]; then
-    echo "## IRC: summary due"
-    echo "~${TICK_INTERVAL} turns since last summary. Post a 1-3 line recap to IRC: \`~/.claude/hooks/irc-send.sh \"your recap\"\`"
+  nudge_phase=$((ticks - TICK_INTERVAL))
+  if [[ $nudge_phase -eq 0 ]]; then
+    echo "## IRC: what's new?"
+    echo "Been a while since you shared anything on IRC. A sentence or two about what you're working on would help the other side stay in the loop: \`~/.claude/hooks/irc-send.sh \"your update\"\`"
+  elif [[ $nudge_phase -eq 1 ]]; then
+    echo "## IRC: still waiting on that update"
+    echo "The other Claude(s) can't see what you're doing. Even a quick \"working on X, found Y\" keeps the channel useful: \`~/.claude/hooks/irc-send.sh \"your update\"\`"
+  elif [[ $nudge_phase -eq 2 ]]; then
+    echo "## IRC: last nudge, then silence for a while"
+    echo "Post something short — what changed, what you learned, what's next. Don't write an essay, just a few sentences: \`~/.claude/hooks/irc-send.sh \"your update\"\`"
     ticks=0
   fi
   echo "$ticks" > "$TICK_FILE"

@@ -4,19 +4,20 @@ How contextual guidance gets injected into Claude Code sessions.
 
 ## Hook Events
 
-Six Claude Code hook events drive the system. Each fires shell scripts that scan for matching ways and inject their content.
+Claude Code hook events drive the system. Each fires shell scripts that scan for matching ways and inject their content.
 
 | Event | When | Scripts |
 |-------|------|---------|
 | **SessionStart** (startup) | Fresh session | `clear-markers.sh`, `show-core.sh`, `init-project-ways.sh`, `check-config-updates.sh` |
-| **SessionStart** (compact) | After compaction | `clear-markers.sh`, `show-core.sh` |
-| **UserPromptSubmit** | Every user message | `check-prompt.sh`, `check-state.sh` |
+| **SessionStart** (compact) | After compaction | `clear-markers.sh`, `show-core.sh`, `irc-session.sh` |
+| **SessionStart** (resume) | Session resume | `irc-session.sh` |
+| **UserPromptSubmit** | Every user message | `check-prompt.sh`, `check-state.sh`, `irc-check.sh` |
 | **PreToolUse** (Edit\|Write) | Before file edit | `check-file-pre.sh` |
 | **PreToolUse** (Bash) | Before command | `check-bash-pre.sh` |
 | **PreToolUse** (Task) | Before subagent spawn | `check-task-pre.sh` |
 | **PreToolUse** (TaskCreate) | Before task creation | `mark-tasks-active.sh` |
 | **SubagentStart** | When subagent starts | `inject-subagent.sh` |
-| **Stop** | After Claude responds | `check-response.sh` |
+| **Stop** | After Claude responds | `check-response.sh`, `irc-check.sh` |
 
 ## What Each Script Does
 
@@ -43,6 +44,11 @@ All trigger evaluation scripts respect the `scope:` frontmatter field - ways wit
 - **`check-task-pre.sh`** - PreToolUse:Task hook (Phase 1). Reads the Task tool's `prompt` parameter, scans ways with `scope: subagent`, matches using `match-way.sh` (same additive logic as `check-prompt.sh`). Writes matched way paths to `/tmp/.claude-subagent-stash-{session_id}/`. Never blocks Task creation.
 - **`inject-subagent.sh`** - SubagentStart hook (Phase 2). Reads the oldest stash file, claims it atomically, emits way content as JSON `hookSpecificOutput.additionalContext`. Bypasses markers entirely - subagents get fresh context regardless of what the parent triggered.
 - **`match-way.sh`** - Shared matching function sourced by `check-prompt.sh` and `check-task-pre.sh`. Provides `detect_semantic_engine()` (BM25 → NCD → none) and `match_way_prompt()` (additive pattern OR semantic). Single source of truth for the degradation chain.
+
+### IRC Communication
+
+- **`irc-check.sh`** - Ambient IRC monitoring. Fires on UserPromptSubmit and Stop. Uses a high-water mark (`.hwm`) to surface only new messages since last check. Notification tiers: mentions inline, ≤3 messages inline, >3 as badge count. Self-filters own messages. Tracks tick count and nudges a summary recap every ~15 turns when others are present. Sets `.irc-has-history` flag for compaction awareness.
+- **`irc-session.sh`** - Compaction breadcrumb. Fires on SessionStart:compact and SessionStart:resume. Checks `.irc-has-history` flag and emits a reminder to catch up via `irc-read.sh`.
 
 ### State Management
 

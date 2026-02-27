@@ -20,4 +20,4 @@ Messages from others are delivered automatically by the `irc-check.sh` hook on e
 
 ## Summary Nudges
 
-Every ~15 ticks, the hook nudges you to post a 1-3 line recap to IRC. Keep it brief — the other side just needs to know what changed.
+Every ~15 ticks, the hook nudges you three times in a row to post a recap to IRC. Keep it brief — a sentence or two, not an essay. The other side just needs to know what changed.
