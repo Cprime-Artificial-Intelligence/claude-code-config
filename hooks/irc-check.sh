@@ -59,3 +59,19 @@ if [[ $total -gt $last ]]; then
   # Update high-water mark
   echo "$total" > "$HWM_FILE"
 fi
+
+# Tick counter — nudge Claude to post a summary every N ticks
+# Only count ticks when others are in the channel (not talking to ourselves)
+TICK_FILE="$BASE/.irc-ticks"
+TICK_INTERVAL=15
+others_present=$(grep -v "<${MY_NICK}>" "$CHANNEL_OUT" 2>/dev/null | grep -c '<' || echo 0)
+if [[ $others_present -gt 0 ]]; then
+  ticks=$(cat "$TICK_FILE" 2>/dev/null || echo 0)
+  ticks=$((ticks + 1))
+  if [[ $ticks -ge $TICK_INTERVAL ]]; then
+    echo "## IRC: summary due"
+    echo "~${TICK_INTERVAL} turns since last summary. Post a 1-3 line recap to IRC: \`~/.claude/hooks/irc-send.sh \"your recap\"\`"
+    ticks=0
+  fi
+  echo "$ticks" > "$TICK_FILE"
+fi
