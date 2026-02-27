@@ -1,5 +1,5 @@
 ---
-status: Draft
+status: Accepted
 date: 2026-02-26
 deciders:
   - aaronsb
@@ -18,28 +18,62 @@ The core need remains: two Claude Code instances on the same machine need a way 
 
 ## Decision
 
-Use IRC for agent-to-agent communication, with `miniircd` (a single-file Python 3 IRC server) for the server and `ii` (suckless filesystem-based IRC client) for the client. A one-shot wormhole transfer bootstraps the connection by delivering host/port/channel info. After that, all communication flows over IRC.
+Use IRC for agent-to-agent communication, with `miniircd` (a single-file Python 3 IRC server) for the server and `ii` (suckless filesystem-based IRC client) for the client. The human relays connection details (host, port, channel) between instances. All communication flows over IRC.
 
 ### Architecture
 
 ```
-Claude A  →  ii (FIFO/file)  →  miniircd (localhost:PORT)  ←  ii (FIFO/file)  ←  Claude B
-                                    #relay
+Claude-5d00b2  →  ii (FIFO/file)  →  miniircd (localhost:PORT)  ←  ii (FIFO/file)  ←  Claude-144dc4
+   (~/.claude)                           #relay                                          (~/temp)
 ```
+
+### Identity: Hash-Based Nicks
+
+Each instance derives a deterministic nick from its working directory using a sha256 hash:
+
+```
+/home/aaron/.claude → claude-5d00b2
+/home/aaron/temp    → claude-144dc4
+```
+
+This replaces hardcoded `claude-a`/`claude-b` naming. The hash is stable across restarts, unique per directory, and fits IRC nick limits (16 chars). The ii base directory uses the same slug: `/tmp/irc-chat-<hash>/`.
+
+Implementation: `~/.claude/hooks/irc-lib.sh` provides `irc_nick_from_dir()` and `irc_slug_from_dir()`.
 
 ### Why This Works
 
 - **ii is filesystem-based**: messages are regular files (`out`) and FIFOs (`in`). Claude reads and writes them with standard tools — no IRC library needed.
 - **miniircd is zero-config**: a single Python 3 file, starts with one command, no config files, no accounts.
 - **IRC handles the hard parts**: message ordering, buffering, fan-out, presence detection — all the problems the wormhole manifest protocol tried to solve manually.
-- **Wormhole does what it's good at**: one-shot delivery of the connection payload. No manifest, no pre-agreed codes, no timing races.
 
 ### Bootstrapping
 
-1. Side A starts miniircd on a random high port, connects with ii, joins `#relay`
-2. Side A writes connection info to a JSON file and sends it via wormhole (one human-relayed code)
-3. Side B receives the connection info, connects with ii, joins `#relay`
-4. Both sides chat via filesystem read/write
+1. Host starts miniircd on a random high port, connects with ii (hash-derived nick), joins `#relay`
+2. Human relays host, port, and channel to the other instance (3 values, no wormhole needed)
+3. Joiner connects with ii (its own hash-derived nick), joins `#relay`
+4. Both sides chat via wrapper scripts (`irc-send.sh`, `irc-read.sh`)
+
+Wormhole is not used for local bootstrapping — the human relay is simpler and more reliable for 3 values on the same machine. Wormhole remains available for remote bootstrapping (delivering connection details to a real IRC server across machines).
+
+### Ambient Monitoring
+
+A `UserPromptSubmit` hook (`~/.claude/hooks/irc-check.sh`) provides tick-based message delivery:
+
+- **High-water mark**: tracks last-read line in `.hwm` file, only surfaces new messages
+- **Notification tiers**: direct mentions show the message, ≤3 new messages inline, >3 as a badge count
+- **Self-filtering**: own messages excluded to avoid echo
+- **Join/part detection**: connection events surfaced as one-liners
+
+Time is tick-based: each Claude Code API round-trip is an epoch. The hook fires on each user prompt, not on wall-clock time.
+
+### Wrapper Scripts
+
+All IRC I/O goes through allowlisted wrapper scripts to avoid permission prompts and path issues (`#` in channel names triggers Claude Code's shell parser):
+
+- `~/.claude/hooks/irc-send.sh <message>` — send to `#relay`
+- `~/.claude/hooks/irc-read.sh [N]` — read last N messages
+
+Scripts auto-detect the active `/tmp/irc-chat-*` connection via `irc-lib.sh`.
 
 ### Scope
 
@@ -53,7 +87,8 @@ Localhost only for now. Both Claude instances must be on the same machine. Cross
 - Claude operates IRC through filesystem I/O — no special libraries or raw socket handling
 - Zero infrastructure beyond a single Python process
 - Trivially extensible — more agents join the same channel, add more channels for topics
-- Clean separation: wormhole for bootstrap, IRC for conversation
+- Ambient monitoring via hooks — messages appear in context automatically without manual polling
+- Hash-based identity — deterministic, stable across restarts, no coordination needed
 
 ### Negative
 
@@ -65,9 +100,10 @@ Localhost only for now. Both Claude instances must be on the same machine. Cross
 ### Neutral
 
 - miniircd is GPL-2.0 licensed — vendoring the single file is fine for personal tooling
-- The `/wormhole` skill remains unchanged — it handles file transfers, not conversations
-- The `/irc-chat` skill handles both host and join roles
+- The `/wormhole` skill remains available for one-shot file transfers and potential remote IRC bootstrapping
+- The `/irc-chat` skill handles both host and join roles, using hash-derived nicks
 - ADR-101's manifest protocol is deprecated but preserved as documentation of what was tried and why it failed
+- Wrapper scripts and permission allowlisting are implementation details that may evolve as Claude Code's permission model changes
 
 ## Alternatives Considered
 

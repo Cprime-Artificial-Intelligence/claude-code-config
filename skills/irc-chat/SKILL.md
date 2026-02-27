@@ -6,7 +6,7 @@ allowed-tools: Bash, Read, Glob, AskUserQuestion, Write
 
 # IRC Chat — Local Agent-to-Agent Communication
 
-Two Claude instances on the same machine communicate over a local IRC server using `ii` (filesystem-based IRC client). One side hosts (starts the server), the other joins. A one-shot wormhole transfer bootstraps the connection.
+Two Claude instances on the same machine communicate over a local IRC server using `ii` (filesystem-based IRC client). Nicks are derived from the working directory hash, so each instance gets a stable, unique identity.
 
 ## Prerequisites
 
@@ -14,6 +14,18 @@ Two Claude instances on the same machine communicate over a local IRC server usi
 - `miniircd` — bundled with this skill at `~/.claude/skills/irc-chat/miniircd`
 
 If `ii` is missing, tell the user: `sudo pacman -S ii` (Arch) or build from https://tools.suckless.org/ii/
+
+## Nick Derivation
+
+Nicks are deterministic from the working directory:
+
+```bash
+source ~/.claude/hooks/irc-lib.sh
+NICK=$(irc_nick_from_dir)   # e.g. claude-5d00b2
+SLUG=$(irc_slug_from_dir)   # e.g. 5d00b2
+```
+
+This means `/home/aaron/.claude` always gets the same nick, and `/home/aaron/temp` always gets a different one. The slug is used for the ii base directory: `/tmp/irc-chat-<slug>/`.
 
 ## Step 0: Determine Role
 
@@ -25,7 +37,7 @@ If `ii` is missing, tell the user: `sudo pacman -S ii` (Arch) or build from http
 
 ---
 
-## Host Flow (Side A)
+## Host Flow
 
 ### 1. Pick a port and channel
 
@@ -52,103 +64,118 @@ sleep 1 && ss -tlnp | grep $PORT
 ### 3. Connect with ii
 
 ```bash
-ii -s 127.0.0.1 -p $PORT -n claude-a -i /tmp/irc-chat-a &
-II_PID=$!
+source ~/.claude/hooks/irc-lib.sh
+NICK=$(irc_nick_from_dir)
+SLUG=$(irc_slug_from_dir)
+IRC_BASE="/tmp/irc-chat-${SLUG}"
+
+ii -s 127.0.0.1 -p $PORT -n "$NICK" -i "$IRC_BASE" &
 sleep 2
-echo "/j #$CHANNEL" > /tmp/irc-chat-a/127.0.0.1/in
+echo "/j #$CHANNEL" > "$IRC_BASE/127.0.0.1/in"
 sleep 1
 ```
 
-### 4. Generate and send connection payload
+### 4. Give the user connection details
 
-Create a simple connection file:
+Tell the user the host, port, and channel so they can pass it to the other Claude instance:
 
-```bash
-cat > /tmp/irc-connect.json << EOF
-{"host":"127.0.0.1","port":$PORT,"channel":"#$CHANNEL","nick":"claude-b"}
-EOF
+```
+Connection details:
+- Host: 127.0.0.1
+- Port: $PORT
+- Channel: #relay
 ```
 
-Send via wormhole (the one human-relayed code):
+No wormhole needed — the user relays these three values.
+
+### 5. Wait for the other side
 
 ```bash
-wormhole send --hide-progress /tmp/irc-connect.json
+tail -1 "$IRC_BASE/127.0.0.1/#$CHANNEL/out"
 ```
 
-Tell the user: "Share this wormhole code with the other Claude instance. They should say 'join IRC chat' and provide the code."
+Once the other side joins, send a hello.
 
-### 5. Wait for side B
+### 6. Initialize ambient monitoring
 
-Watch for their join message:
+Reset the high-water mark so the UserPromptSubmit hook starts tracking from now:
 
 ```bash
-tail -1 /tmp/irc-chat-a/127.0.0.1/#$CHANNEL/out
+wc -l < "$IRC_BASE/127.0.0.1/#$CHANNEL/out" > "$IRC_BASE/.hwm"
 ```
 
-Once side B joins, confirm: "Connected! You can now chat."
-
-### 6. Chat loop
-
-To read messages:
-```bash
-tail -5 /tmp/irc-chat-a/127.0.0.1/#relay/out
-```
-
-To send messages:
-```bash
-echo "your message here" > /tmp/irc-chat-a/127.0.0.1/#relay/in
-```
-
-Read the `out` file periodically to check for new messages. Send by echoing to the `in` FIFO.
+The hook at `~/.claude/hooks/irc-check.sh` auto-delivers new messages on each tick.
 
 ---
 
-## Join Flow (Side B)
+## Join Flow
 
 ### 1. Get connection info
 
-**Interactive**: Ask the user for the wormhole code, then receive:
-
-```bash
-wormhole receive --accept-file --hide-progress -o /tmp/ WORMHOLE_CODE
-```
-
-Read the connection file:
-
-```bash
-cat /tmp/irc-connect.json
-```
-
-**Automated**: connection info is in the task prompt.
+The user provides host, port, and channel from the hosting side.
 
 ### 2. Connect with ii
 
 ```bash
-ii -s HOST -p PORT -n claude-b -i /tmp/irc-chat-b &
-II_PID=$!
+source ~/.claude/hooks/irc-lib.sh
+NICK=$(irc_nick_from_dir)
+SLUG=$(irc_slug_from_dir)
+IRC_BASE="/tmp/irc-chat-${SLUG}"
+
+ii -s $HOST -p $PORT -n "$NICK" -i "$IRC_BASE" &
 sleep 2
-echo "/j #CHANNEL" > /tmp/irc-chat-b/HOST/in
+echo "/j #$CHANNEL" > "$IRC_BASE/$HOST/in"
 sleep 1
 ```
 
-### 3. Send hello
+### 3. Send hello and initialize HWM
 
 ```bash
-echo "Side B connected. Ready to chat." > /tmp/irc-chat-b/HOST/#CHANNEL/in
+~/.claude/hooks/irc-send.sh "Connected from $(irc_nick_from_dir). Ready to chat."
+wc -l < "$IRC_BASE/$HOST/#$CHANNEL/out" > "$IRC_BASE/.hwm"
 ```
 
-### 4. Chat loop
+---
 
-Same as host — read `out`, write to `in`.
+## Sending and Reading Messages
+
+Always use the wrapper scripts — they handle path resolution and are permission-allowlisted:
+
+```bash
+# Send a message
+~/.claude/hooks/irc-send.sh "your message here"
+
+# Read last N messages
+~/.claude/hooks/irc-read.sh 10
+```
+
+New messages from others are automatically injected by the `irc-check.sh` hook on each user prompt (tick-based delivery).
+
+---
+
+## Ambient Monitoring (irc-check.sh)
+
+The `UserPromptSubmit` hook at `~/.claude/hooks/irc-check.sh`:
+- Tracks a high-water mark file (`.hwm`) to avoid replaying old messages
+- Filters out your own messages
+- Notification tiers:
+  - Direct mention → shows the message
+  - ≤3 new messages → shows them inline
+  - >3 new messages → badge count with last message
+- Detects join/part events
+
+No manual polling needed — messages appear in your context automatically.
 
 ---
 
 ## Ending the Chat
 
-Either side can initiate:
+Either side can disconnect:
 
 ```bash
-echo "/q goodbye" > /tmp/irc-chat-{a,b}/127.0.0.1/in
+source ~/.claude/hooks/irc-lib.sh
+SLUG=$(irc_slug_from_dir)
+echo "/q goodbye" > "/tmp/irc-chat-${SLUG}/127.0.0.1/in"
 ```
 
 **Host only** — stop the server:
@@ -160,7 +187,8 @@ pkill -f "miniircd.*--ports $PORT"
 **Both sides** — clean up:
 
 ```bash
-rm -rf /tmp/irc-chat-{a,b} /tmp/irc-connect.json
+source ~/.claude/hooks/irc-lib.sh
+rm -rf "/tmp/irc-chat-$(irc_slug_from_dir)"
 ```
 
 ---
@@ -168,7 +196,9 @@ rm -rf /tmp/irc-chat-{a,b} /tmp/irc-connect.json
 ## Key Principles
 
 - **ii is filesystem-based** — `out` is a regular file (read it), `in` is a FIFO (echo to it)
-- **One wormhole, then IRC** — wormhole bootstraps the connection, IRC handles the conversation
+- **Hash-based nicks** — deterministic from pwd, stable across restarts, no collisions
+- **Tick-based time** — each Claude Code turn is an epoch; wall-clock time doesn't apply
+- **Pull, not push** — hook delivers new messages per-tick as notifications, not a firehose
+- **Wrapper scripts** — always use `irc-send.sh` / `irc-read.sh` to avoid permission and path issues
 - **Localhost only** — both instances must be on the same machine
 - **Ephemeral** — everything lives in `/tmp/`, nothing persists after cleanup
-- **No authentication** — local-only, trusted environment
