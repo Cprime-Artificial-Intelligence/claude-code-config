@@ -9,10 +9,7 @@
       "Edit(~/.claude/**)",
       "Read(~/.claude/**)",
       "Write(~/.claude/**)",
-      "Bash(~/.claude/hooks/ways/list-triggered.sh:*)",
-      "Bash(~/.claude/hooks/irc-send.sh *)",
-      "Bash(~/.claude/hooks/irc-read.sh *)",
-      "Bash(~/.claude/hooks/irc-read.sh)"
+      "Bash(~/.claude/hooks/ways/list-triggered.sh:*)"
     ],
     "defaultMode": "default"
   },
@@ -49,10 +46,6 @@
           {
             "type": "command",
             "command": "${HOME}/.claude/hooks/ways/show-core.sh"
-          },
-          {
-            "type": "command",
-            "command": "${HOME}/.claude/hooks/irc-session.sh"
           }
         ]
       },
@@ -62,10 +55,6 @@
           {
             "type": "command",
             "command": "${HOME}/.claude/hooks/ways/show-core.sh"
-          },
-          {
-            "type": "command",
-            "command": "${HOME}/.claude/hooks/irc-session.sh"
           }
         ]
       },
@@ -135,10 +124,6 @@
           {
             "type": "command",
             "command": "${HOME}/.claude/hooks/ways/check-state.sh"
-          },
-          {
-            "type": "command",
-            "command": "${HOME}/.claude/hooks/irc-check.sh"
           }
         ]
       }
@@ -159,10 +144,6 @@
           {
             "type": "command",
             "command": "${HOME}/.claude/hooks/ways/check-response.sh"
-          },
-          {
-            "type": "command",
-            "command": "${HOME}/.claude/hooks/irc-check.sh"
           }
         ]
       }
@@ -177,7 +158,8 @@
     "code-simplifier@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
-    "ralph-loop@claude-plugins-official": false
+    "ralph-loop@claude-plugins-official": false,
+    "gopls-lsp@claude-plugins-official": true
   },
   "alwaysThinkingEnabled": true
 }
