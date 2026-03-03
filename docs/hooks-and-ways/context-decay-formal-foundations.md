@@ -129,7 +129,7 @@ Principle 3 is the critical one for the context decay model. Every unit of gain 
 
 McRuer's crossover model is quasi-linear: it consists of a linear component (the transfer function) and a nonlinear component called the **remnant**.
 
-$$y_p(t) = \mathcal{L}^{-1}\left\{Y_p(s)\right\} * e(t) + n_p(t)$$
+$$y_p(t) = \mathcal{L}^{-1}\lbrace Y_p(s)\rbrace * e(t) + n_p(t)$$
 
 where $e(t)$ is the tracking error and $n_p(t)$ is the remnant — a noise-like signal uncorrelated with the input. The remnant represents:
 
