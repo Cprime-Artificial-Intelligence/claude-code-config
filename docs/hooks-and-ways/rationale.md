@@ -53,6 +53,8 @@ The ways architecture draws on four research traditions. We're not implementing 
 
 **How it maps to ways:** Hook-based injection is analogous to precision-weighting -- increasing the gain on relevant prediction error at the right moment. When a way fires at `git commit`, it's the system saying "this is a moment where prediction accuracy matters, here's a high-precision prior." Loading everything upfront treats all information as equally precise at all times, which is computationally wasteful and informationally meaningless.
 
+For the formal treatment — how the system prompt acts as a prior that gets overwhelmed by the likelihood, and how ways re-anchor the posterior — see [context-decay-formal-foundations.md](context-decay-formal-foundations.md) §6.1.
+
 ### Predictive Processing
 
 **Core idea:** The brain operates as a hierarchical prediction machine. Only prediction errors propagate upward through the hierarchy; correct predictions are silently confirmed. Cognition is largely about generating and refining top-down predictions (Clark, 2016; Rao & Ballard, 1999).

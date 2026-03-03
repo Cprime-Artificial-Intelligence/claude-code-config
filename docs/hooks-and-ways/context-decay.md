@@ -1,6 +1,6 @@
 # The Context Decay Model: Why Timed Injection Beats Front-Loading
 
-Ways are a progressive disclosure system for LLM context. This document explains the attention mechanics that make timed injection outperform monolithic system prompts — not as analogy, but as a description of the inference dynamics that govern how models use instructions.
+Ways are a progressive disclosure system for LLM context. This document explains the attention mechanics that make timed injection outperform monolithic system prompts — not as analogy, but as a description of the inference dynamics that govern how models use instructions. A companion document, [Formal Foundations](context-decay-formal-foundations.md), grounds each claim here in published transformer research, control theory, and human operator modeling.
 
 ## The Decay Problem
 
@@ -91,6 +91,8 @@ The system prompt provides the baseline. Ways provide the reinforcement signal t
 ## Relationship to Other Documentation
 
 This document describes the attention mechanics — the *how* of context decay and injection topology.
+
+For the formal mathematical proofs — RoPE decay derivations, multi-layer amplification, cascade control theory, McRuer's crossover model applied to human-LLM steering, and steady-state adherence conditions — see [context-decay-formal-foundations.md](context-decay-formal-foundations.md).
 
 For the cognitive science foundations — active inference, predictive processing, situated cognition — see [rationale.md](rationale.md).
 
