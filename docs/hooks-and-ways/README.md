@@ -56,6 +56,8 @@ flowchart TD
     subgraph GUIDE ["Guide Layer (human prose)"]
         direction TB
         R[rationale.md]
+        CD[context-decay.md]
+        CDF[context-decay-formal-foundations.md]
         M[matching.md]
         MA[macros.md]
         E[extending.md]
@@ -180,8 +182,10 @@ See [provenance.md](provenance.md) for the full traceability system — manifest
 If you want to understand the system:
 1. **This file** — you're here
 2. **[rationale.md](rationale.md)** — why this exists
-3. **[../hooks-and-ways.md](../hooks-and-ways.md)** — how it works (reference)
-4. **Domain docs** — the policy for each group of ways
+3. **[context-decay.md](context-decay.md)** — the attention decay model and injection topology
+4. **[context-decay-formal-foundations.md](context-decay-formal-foundations.md)** — formal proofs, control theory, human operator modeling
+5. **[../hooks-and-ways.md](../hooks-and-ways.md)** — how it works (reference)
+6. **Domain docs** — the policy for each group of ways
 
 If you want to add or modify ways:
 1. **[extending.md](extending.md)** — how to create ways
