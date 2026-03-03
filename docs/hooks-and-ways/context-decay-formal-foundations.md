@@ -20,7 +20,7 @@ Modern LLMs use Rotary Position Embeddings (RoPE), which encode relative positio
 
 For sinusoidal positional encodings (the original Transformer), the inner product between two position vectors decays asymptotically as:
 
-$$\langle PE(m), PE(n) \rangle \sim O\!\left(\frac{1}{|m-n|}\right)$$
+$$\langle PE(m), PE(n) \rangle \sim O\left(\frac{1}{|m-n|}\right)$$
 
 This creates what the positional encoding literature calls a **natural attention bias toward local context** — tokens attend more strongly to nearby tokens, with influence falling off inversely with distance (Vaswani et al., 2017).
 
@@ -30,7 +30,7 @@ $$\theta_k = b^{-2k/d}$$
 
 where $b$ is the base (typically 10000) and $d$ is the model dimension. Each frequency band contributes a cosine-modulated decay to the attention score:
 
-$$a_{ij} \propto \sum_k \cos\!\bigl((i - j)\,\theta_k\bigr)$$
+$$a_{ij} \propto \sum_k \cos\left((i - j)\,\theta_k\right)$$
 
 Low-frequency components (small $\theta_k$) decay slowly and distinguish distant positions. High-frequency components decay rapidly and encode fine-grained local structure. The aggregate effect is that **attention weights diminish severely beyond approximately 20 tokens of distance**, after which the model struggles to learn useful positional patterns (Attention Needs to Focus, 2026).
 
@@ -129,7 +129,7 @@ Principle 3 is the critical one for the context decay model. Every unit of gain 
 
 McRuer's crossover model is quasi-linear: it consists of a linear component (the transfer function) and a nonlinear component called the **remnant**.
 
-$$y_p(t) = \mathcal{L}^{-1}\!\bigl\{Y_p(s)\bigr\} * e(t) + n_p(t)$$
+$$y_p(t) = \mathcal{L}^{-1}\left\{Y_p(s)\right\} * e(t) + n_p(t)$$
 
 where $e(t)$ is the tracking error and $n_p(t)$ is the remnant — a noise-like signal uncorrelated with the input. The remnant represents:
 
@@ -162,7 +162,7 @@ The direct translation to LLM interaction:
 
 The relationship between workload and operator performance follows an inverted-U (the Yerkes-Dodson law, adapted to tracking tasks):
 
-$$\text{Performance} \propto K(\text{workload}) \cdot \bigl(1 - \tau(\text{workload}) \cdot s\bigr)$$
+$$\text{Performance} \propto K(\text{workload}) \cdot \left(1 - \tau(\text{workload}) \cdot s\right)$$
 
 At low workload: gain is moderate, delay is long, the operator is under-engaged. This is the "poor steering" regime — the human is coasting, accepting outputs without scrutiny.
 
@@ -385,7 +385,7 @@ The stacked decomposition shows how each term dominates at different phases: the
 
 The system reaches steady state when the injection term compensates for the system prompt decay at a rate faster than the decay itself. Formally, if injections fire at intervals $T_\mathrm{inject}$, steady state requires:
 
-$$\mathbb{E}\!\left[\sum_{i} \frac{A_{\mathrm{inject},i}}{1 + k \cdot N_i}\right] \geq A_\mathrm{threshold}$$
+$$\mathbb{E}\left[\sum_{i} \frac{A_{\mathrm{inject},i}}{1 + k \cdot N_i}\right] \geq A_\mathrm{threshold}$$
 
 where $A_\mathrm{threshold}$ is the minimum adherence level needed for correct behavior, and the expectation is over the stochastic injection schedule (determined by which tools are invoked and which ways match).
 
