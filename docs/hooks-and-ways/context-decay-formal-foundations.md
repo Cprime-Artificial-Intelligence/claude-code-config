@@ -2,6 +2,16 @@
 
 **A companion to [The Context Decay Model: Why Timed Injection Beats Front-Loading](context-decay.md)**
 
+## In Plain Terms
+
+AI assistants like Claude forget their instructions as conversations get longer. Not because they're broken — it's how the underlying attention mechanism works. The further away an instruction is from what the model is currently generating, the less influence it has. Research confirms this: information in the middle of a long conversation can lose over 30% of its effectiveness.
+
+The ways system is a control loop that injects small, structured guidance signals at the moments they're relevant — close to where the model is actively paying attention. Rather than one large upfront payload that fades over distance, frequent small corrections keep the signal fresh. The effect is that the human operator doesn't have to constantly re-explain conventions, catch format drift, or repeat themselves. The cognitive load drops.
+
+The human still drives. Ways don't make decisions — they maintain consistency so the operator can focus on direction, judgment, and the parts of the work that actually require a person. This two-layer structure — automated correction for routine adherence, human authority for strategic choices — is a well-known pattern in control engineering called cascade control. The rest of this document shows how each piece maps to established theory.
+
+---
+
 This document maps the context decay model to established research in transformer attention mechanics, human operator control theory, and cascaded feedback systems. Where the primary document describes the *what*, this document provides the *why* — grounding each claim in published theory, empirical findings, and formal mathematical models.
 
 ---
