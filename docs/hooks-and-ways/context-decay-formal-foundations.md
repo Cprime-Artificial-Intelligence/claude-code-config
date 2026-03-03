@@ -85,9 +85,9 @@ graph TD
     REC -->|"Recency bias<br/>(minimal decay)"| CURSOR
     MID -->|"Lost in the middle<br/>(both biases work against)"| CURSOR
 
-    style SP fill:#f4a261,stroke:#e76f51
-    style MID fill:#e76f51,stroke:#e76f51
-    style REC fill:#2a9d8f,stroke:#264653
+    style SP fill:#f4a261,stroke:#e76f51,color:#000
+    style MID fill:#e76f51,stroke:#e76f51,color:#000
+    style REC fill:#2a9d8f,stroke:#264653,color:#fff
     style CURSOR fill:#264653,stroke:#264653,color:#fff
 ```
 
@@ -196,9 +196,9 @@ graph LR
         COMPLEXITY["Task complexity"] -->|"increases delay"| DELAY
     end
 
-    style GAIN fill:#2a9d8f,stroke:#264653
-    style DELAY fill:#e9c46a,stroke:#e76f51
-    style REMNANT fill:#e76f51,stroke:#e76f51
+    style GAIN fill:#2a9d8f,stroke:#264653,color:#fff
+    style DELAY fill:#e9c46a,stroke:#e76f51,color:#000
+    style REMNANT fill:#e76f51,stroke:#e76f51,color:#000
 ```
 
 ---
@@ -258,7 +258,7 @@ graph TB
 
     style HUMAN_CTRL fill:#264653,stroke:#264653,color:#fff
     style WAY_CTRL fill:#2a9d8f,stroke:#264653,color:#fff
-    style LLM fill:#e9c46a,stroke:#e76f51
+    style LLM fill:#e9c46a,stroke:#e76f51,color:#000
     style DECAY fill:#e76f51,stroke:#e76f51,color:#fff
 ```
 
@@ -293,6 +293,7 @@ The inner loop must also be **narrow in scope** — it should reject specific, w
 The cascaded architecture produces four operating regimes, each with a well-characterized performance envelope:
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"quadrant1Fill": "#2a9d8f", "quadrant2Fill": "#e9c46a", "quadrant3Fill": "#e76f51", "quadrant4Fill": "#f4a261", "quadrant1TextFill": "#fff", "quadrant2TextFill": "#000", "quadrant3TextFill": "#fff", "quadrant4TextFill": "#000", "quadrantPointFill": "#264653", "quadrantPointTextFill": "#264653", "quadrantXAxisTextFill": "#264653", "quadrantYAxisTextFill": "#264653", "quadrantTitleFill": "#264653", "quadrantExternalBorderStrokeFill": "#264653", "quadrantInternalBorderStrokeFill": "#264653"}}}%%
 quadrantChart
     title Operating Regimes of the Cascaded System
     x-axis "Poor Ways" --> "Good Ways"
