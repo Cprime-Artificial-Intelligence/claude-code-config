@@ -221,22 +221,39 @@ Also included:
 - **[Usage stats](docs/hooks-and-ways/stats.md)** — way firing telemetry by scope, team, project, and trigger type
 - **Update checking** — detects clones, forks, renamed copies; nudges you when behind upstream
 
-## Ways vs Skills
+## Why Ways? (Rules, Skills, and Ways)
 
-Claude Code has built-in **Skills** that use semantic matching to discover relevant knowledge. Ways do the same thing — but externally.
+Claude Code ships two official features for injecting guidance: **Rules** (`.claude/rules/*.md`) and **Skills** (`~/.claude/skills/`). Ways solve problems that neither can.
 
-Both use semantic similarity to decide what guidance to inject. Skills match inside Claude's process against skill descriptions. Ways match outside it, using [BM25](https://en.wikipedia.org/wiki/Okapi_BM25) term-frequency scoring running in bash hooks before tools execute. The matching is similar; the control is different.
+### The progressive disclosure problem
 
-| | Skills | Ways |
-|--|--------|------|
-| **Matching** | Claude's internal semantic matching | BM25 scoring (external, in hooks) |
-| **Trigger** | User intent → Claude decides | Tool use, file edits, keywords, BM25 score |
-| **Control** | Claude requests permission | Automatic injection (no permission needed) |
-| **Frequency** | Per semantic match | Once per session (marker-gated) |
+Rules and ways both inject guidance conditionally — but their disclosure models are fundamentally different:
 
-Ways also support regex patterns and command/file triggers that skills can't — they fire on `git commit`, on editing `.env`, on spawning a subagent. Skills can restrict tools (`allowed-tools`), which ways can't. They complement each other: ways push governance *in* automatically, skills let Claude pull capability *out* by intent.
+- **Rules** disclose based on **file paths** (`paths: src/api/**`). The project's directory tree *is* the disclosure taxonomy. This works when concerns map cleanly to directories, but most concerns don't — security, testing conventions, commit standards, and performance patterns cut across every directory.
 
-For the full comparison: [docs/hooks-and-ways/README.md](docs/hooks-and-ways/README.md#ways-vs-skills)
+- **Ways** disclose based on **actions and intent** — what you're doing (running `git commit`), what you're talking about ("optimize this query"), or what state the session is in (context 75% full). The disclosure schedule is decoupled from the file hierarchy entirely.
+
+This matters because of how attention works in transformers. Rules loaded at file-read time are closer to the generation cursor than startup rules, but ways inject at the **tool-call boundary** — the closest possible point to where the model is actively generating. The [context decay model](docs/hooks-and-ways/context-decay.md) formalizes why this temporal coupling outperforms spatial coupling for maintaining adherence over long sessions.
+
+### Three features, three jobs
+
+| | **Rules** | **Skills** | **Ways** |
+|--|-----------|------------|----------|
+| **What** | Static instructions | Action templates | Event-driven guidance |
+| **Job** | "Always do X" | "Here's how to do Y" | "Right now, remember Z" |
+| **Trigger** | File access or startup | User intent (Claude decides) | Tool use, keywords, state conditions |
+| **Conditional on** | File paths (directory tree) | Semantic similarity | Multi-channel: regex, BM25, commands, files, state |
+| **Cross-cutting concerns** | Needs duplicate `paths:` entries | N/A (intent-based) | Single way fires regardless of file location |
+| **Dynamic content** | No | No | Yes (shell macros) |
+| **Survives refactoring** | No (`src/` → `lib/` breaks paths) | Yes | Yes |
+| **Non-file triggers** | No | No | Yes (`git commit`, context threshold, subagent spawn) |
+| **Governance provenance** | No | No | Yes (NIST, OWASP, ISO, SOC 2 traceability) |
+| **Org-level scope** | Yes (`/etc/claude-code/`) | No | No |
+| **Zero-config simplicity** | Yes (drop a `.md` file) | Yes | No (requires hook infrastructure) |
+
+**Rules** are best for static, always-on preferences ("use TypeScript strict mode", "tabs not spaces"). **Skills** are best for specific capabilities invoked by intent ("ship this PR", "rotate AWS keys"). **Ways** are best for context-sensitive guidance that fires on events, cuts across the file tree, and needs to stay fresh in long sessions.
+
+They compose well: rules set baseline preferences, ways inject governance at tool boundaries, skills provide specific workflows. The [full comparison](docs/hooks-and-ways/README.md#ways-rules-and-skills) covers the architectural details.
 
 ## Governance
 
