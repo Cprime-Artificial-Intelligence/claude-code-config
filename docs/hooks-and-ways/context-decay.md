@@ -14,7 +14,14 @@ The combined effect:
 
 $$A(t) \approx A_0 \cdot n^{-\alpha} \cdot t_\mathrm{local}^{\ -\beta}$$
 
-Where $A(t)$ is effective adherence at time $t$, $A_0$ is initial adherence strength, $n$ is the conversation turn count, and $t_\mathrm{local}$ is token count since the last user message.
+Reading this formula:
+
+- $A(t)$ — **effective adherence** at time $t$. How strongly the model's output actually follows the system prompt right now. Not a binary "remembers or doesn't" — it's a continuous weight that determines how much influence those instructions have on the next generated token.
+- $A_0$ — **initial adherence strength**. The model's attention to the system prompt at the very start of the conversation, before any decay has occurred. This is the ceiling — adherence only goes down from here.
+- $n^{-\alpha}$ — **turn decay**. The conversation turn count $n$ raised to a negative power $\alpha$. This is an inverse power law: doubling the number of turns doesn't halve adherence, it reduces it by a factor of $2^\alpha$. The exponent $\alpha$ controls how aggressively turns erode attention — higher $\alpha$ means faster fade. This term only resets when the conversation itself resets.
+- $t_\mathrm{local}^{\ -\beta}$ — **within-generation decay**. The token count $t_\mathrm{local}$ since the last user message, raised to negative $\beta$. Each token the model generates pushes the system prompt further away in positional distance. The exponent $\beta$ controls how fast attention fades within a single response — higher $\beta$ means the model "forgets" faster during long outputs.
+
+The two decay factors are independent and multiplicative. Even if within-generation decay is mild ($\beta$ is small), turn decay still erodes the envelope over time. And even in a short response ($t_\mathrm{local}$ is small), many turns still reduce the peak.
 
 Each user message partially resets $t_\mathrm{local}$ (the local factor), creating a brief spike in attention to earlier context. But the peak of each spike is lower than the last, because $n$ has incremented. The result is a **damped sawtooth**: attention spikes at each turn boundary, but the envelope of those spikes always drops.
 
@@ -38,7 +45,16 @@ Ways change where guidance enters the context. Instead of one large block at pos
 
 $$A(t) \approx \overbrace{A_0 \cdot n^{-\alpha} \cdot t_\mathrm{local}^{\ -\beta}}^{\mathrm{system\ prompt\ (decaying)}} + \overbrace{A_\mathrm{inject} \cdot t_\mathrm{since}^{\ -\beta}}^{\mathrm{injected\ way\ (fresh)}}$$
 
-The critical difference: the injection term carries only the local decay factor ( $t_\mathrm{since}^{\ -\beta}$ ), not the turn-count envelope ( $n^{-\alpha}$ ). The injection isn't pinned at position zero — it's near the cursor, regardless of how many turns have elapsed. Its positional distance is always small.
+Reading this formula — there are now two additive terms:
+
+- **Left term** (system prompt): Identical to the original decay formula. The system prompt is still there, still decaying with both turn count and generation distance. By mid-conversation this term approaches zero.
+- **Right term** (injected way): The new contribution from a way that was just injected.
+  - $A_\mathrm{inject}$ — **injection strength**. The initial salience of the injected guidance. Analogous to $A_0$ but for the way, not the system prompt.
+  - $t_\mathrm{since}^{\ -\beta}$ — **time since injection**. The token count since this way was injected, subject to the same within-generation decay exponent $\beta$. Crucially, this is the *only* decay factor. There is no $n^{-\alpha}$ term — the injection doesn't carry the accumulated weight of all prior turns.
+
+The critical difference: the injection term carries only the local decay factor ($t_\mathrm{since}^{\ -\beta}$), not the turn-count envelope ($n^{-\alpha}$). The injection isn't pinned at position zero — it's near the cursor, regardless of how many turns have elapsed. Its positional distance is always small.
+
+Why the addition works: even when the system prompt term has decayed to near-zero, the injection term provides a fresh $A_\mathrm{inject}$ that only needs to survive local decay. The total adherence $A(t)$ gets a floor set by the most recent injection, not by the original system prompt's fading signal.
 
 <img src="../images/context-decay-comparison.png" alt="Side-by-side comparison: without ways (damped to noise floor) vs. with ways (steady-state adherence)" width="100%" />
 
@@ -69,7 +85,14 @@ The model implies a practical limit. If too many ways fire simultaneously, they 
 
 $$A_\mathrm{eff} \approx \frac{A_\mathrm{inject}}{1 + k \cdot N_\mathrm{concurrent}}$$
 
-Where $N_\mathrm{concurrent}$ is the number of simultaneously active injections and $k$ is a competition coefficient.
+Reading this formula:
+
+- $A_\mathrm{eff}$ — **effective adherence per injection**. How much influence each individual way actually exerts when multiple ways fire at the same time. This is less than $A_\mathrm{inject}$ whenever there's competition.
+- $A_\mathrm{inject}$ — **single-injection strength**. The adherence a way would achieve if it were the only one firing. This is the numerator — the ideal case.
+- $N_\mathrm{concurrent}$ — **number of simultaneously active injections**. How many ways fired in the same hook response.
+- $k$ — **competition coefficient**. How aggressively injections dilute each other. A higher $k$ means each additional way costs more attention from all the others. This isn't a fixed constant — it depends on how semantically similar the injections are. Two ways about the same topic compete more than two about unrelated concerns.
+
+The denominator $1 + k \cdot N_\mathrm{concurrent}$ grows linearly with the number of injections, so effective adherence drops hyperbolically. One injection gets nearly full strength. Two split the budget. Five are each fighting for scraps. The "+1" in the denominator ensures that a single injection ($N_\mathrm{concurrent} = 0$ additional competitors) gets the full $A_\mathrm{inject}$.
 
 This is why ways are designed to be small (20-60 lines each), fire once per session (marker-gated deduplication), and trigger selectively (BM25 scoring, not blanket activation). The goal is high signal-to-noise at the cursor position, not maximum information delivered. Three precisely timed injections outperform twenty simultaneous ones.
 
