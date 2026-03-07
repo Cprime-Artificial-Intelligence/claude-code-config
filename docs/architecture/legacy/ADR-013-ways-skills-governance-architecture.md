@@ -172,7 +172,7 @@ The provenance layer serves a different audience entirely. The way content prime
 Ways use four matching strategies instead of embeddings:
 
 1. **Regex** (default, fast): pattern matching against prompts, commands, file paths
-2. **Semantic** (BM25): Term-frequency scoring with IDF weighting — no embeddings, no infrastructure dependency. Falls back to gzip NCD when binary unavailable
+2. **Semantic** (BM25): Term-frequency scoring with IDF weighting — no embeddings, no infrastructure dependency
 4. **State triggers**: session conditions (context threshold, file existence, session start)
 
 ### Session-Gating

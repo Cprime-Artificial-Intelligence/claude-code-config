@@ -32,7 +32,7 @@ Claude Code hook events drive the system. Each fires shell scripts that scan for
 
 These scripts fire on **PreToolUse** — before the tool executes, not after. This is a critical design choice: guidance must arrive while Claude can still act on it. A commit format reminder after the commit is too late. Security guidance after the file edit is too late. The "Pre" in PreToolUse means Claude sees the way content and can adjust its behavior before the action happens.
 
-- **`check-prompt.sh`** - Scans all ways for `pattern:` (regex) and `description:`+`vocabulary:` (BM25 semantic) fields. Sources `match-way.sh` for shared matching logic. Matching is additive — either channel firing activates the way. Semantic matching degrades: BM25 binary → gzip NCD → skip. Fires matching ways via `show-way.sh`.
+- **`check-prompt.sh`** - Scans all ways for `pattern:` (regex) and `description:`+`vocabulary:` (BM25 semantic) fields. Sources `match-way.sh` for shared matching logic. Matching is additive — either channel firing activates the way. Fires matching ways via `show-way.sh`.
 - **`check-bash-pre.sh`** - Scans ways for `commands:` patterns. Tests the command about to run. Also checks `pattern:` against the command description.
 - **`check-file-pre.sh`** - Scans ways for `files:` patterns. Tests the file path about to be edited.
 - **`check-state.sh`** - Evaluates `trigger:` fields (context-threshold, file-exists, session-start). See [State Triggers](#state-triggers).
@@ -43,7 +43,7 @@ All trigger evaluation scripts respect the `scope:` frontmatter field - ways wit
 
 - **`check-task-pre.sh`** - PreToolUse:Task hook (Phase 1). Reads the Task tool's `prompt` parameter, scans ways with `scope: subagent`, matches using `match-way.sh` (same additive logic as `check-prompt.sh`). Writes matched way paths to `/tmp/.claude-subagent-stash-{session_id}/`. Never blocks Task creation.
 - **`inject-subagent.sh`** - SubagentStart hook (Phase 2). Reads the oldest stash file, claims it atomically, emits way content as JSON `hookSpecificOutput.additionalContext`. Bypasses markers entirely - subagents get fresh context regardless of what the parent triggered.
-- **`match-way.sh`** - Shared matching function sourced by `check-prompt.sh` and `check-task-pre.sh`. Provides `detect_semantic_engine()` (BM25 → NCD → none) and `match_way_prompt()` (additive pattern OR semantic). Single source of truth for the degradation chain.
+- **`match-way.sh`** - Shared matching function sourced by `check-prompt.sh` and `check-task-pre.sh`. Provides `detect_semantic_engine()` and `match_way_prompt()` (additive pattern OR semantic). BM25 is the primary engine; a legacy NCD fallback exists if the binary is missing.
 
 ### IRC Communication
 
@@ -155,14 +155,12 @@ flowchart TD
     subgraph SM ["Semantic Matching (additive)"]
         S[BM25 Scorer]:::semantic
         S --> BM["way-match pair<br/>Porter2 stemming + IDF"]:::semantic
-        S -.->|"fallback"| NCD["Gzip NCD<br/>if binary unavailable"]:::semantic
     end
 
     RP -->|match| FIRE[Fire Way]:::result
     RC -->|match| FIRE
     RF -->|match| FIRE
     BM -->|"score ≥ threshold"| FIRE
-    NCD -->|"NCD &lt; 0.58"| FIRE
 ```
 
 Matching is **additive** — pattern and semantic are OR'd. A way with both `pattern:` and `description:`+`vocabulary:` can fire from either channel.
@@ -185,7 +183,7 @@ vocabulary: api endpoint route handler middleware
 threshold: 2.0
 ```
 
-Scores description+vocabulary against the user's prompt using Okapi BM25 with Porter2 stemming. Degrades: BM25 binary → gzip NCD fallback → skip.
+Scores description+vocabulary against the user's prompt using Okapi BM25 with Porter2 stemming.
 
 ## State Triggers
 
@@ -422,7 +420,7 @@ Three test layers verify the matching and injection pipeline. See [tests/README.
 
 | Layer | Command | What it tests |
 |-------|---------|---------------|
-| **Fixture** | `bash tools/way-match/test-harness.sh` | BM25 vs NCD scorer accuracy (32 prompts, fixed corpus) |
+| **Fixture** | `bash tools/way-match/test-harness.sh` | BM25 scorer accuracy (32 prompts, fixed corpus) |
 | **Integration** | `bash tools/way-match/test-integration.sh` | Real way files, frontmatter extraction, multi-way discrimination |
 | **Activation** | `read and run the activation test at tests/way-activation-test.md` | Live hook pipeline: regex, BM25, negative control, subagent injection |
 

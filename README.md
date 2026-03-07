@@ -58,14 +58,14 @@ Runs on **Linux** and **macOS**. The hooks are all bash and lean on standard POS
 | `git` | Version control, update checking | Usually pre-installed |
 | `jq` | JSON parsing (hook inputs, configs, API responses) | **Must install** |
 | `cc` | Build BM25 matcher from source (`make local`) | Usually pre-installed; see below |
-| `gzip` | Fallback semantic matching (NCD, when BM25 binary unavailable) | Usually pre-installed |
-| `bc` | Math for NCD fallback scoring | Usually pre-installed (not in Arch `base`) |
+| `gzip` | Legacy NCD fallback (only if BM25 binary missing) | Usually pre-installed |
+| `bc` | Math for legacy NCD fallback | Usually pre-installed (not in Arch `base`) |
 | `python3` | Governance traceability tooling | Stdlib only — no pip packages |
 | [`gh`](https://cli.github.com/) | GitHub API (update checks, repo macros) | Recommended, not required — degrades gracefully |
 
 Standard utilities (`bash`, `awk`, `sed`, `grep`, `find`, `timeout`, `tr`, `sort`, `wc`, `date`) are assumed present via coreutils.
 
-**BM25 semantic matcher:** The primary matching engine is a C binary at `bin/way-match` (source in `tools/way-match/`). Build it with `make local` (uses system `cc`) or `make` (uses [Cosmopolitan](https://cosmo.zip/) for cross-platform binaries). If the binary isn't present, matching degrades gracefully: BM25 → gzip NCD fallback → regex only.
+**BM25 semantic matcher:** The matching engine is a C binary at `bin/way-match` (source in `tools/way-match/`), checked into the repo as a cross-platform binary. To rebuild from source: `make local` (uses system `cc`) or `make` (uses [Cosmopolitan](https://cosmo.zip/)). If the binary is missing, matching falls back to a legacy gzip NCD script, then regex only.
 
 **Platform install guides:**
 [macOS (Homebrew)](docs/prerequisites-macos.md) · [Arch Linux](docs/prerequisites-arch.md) · [Debian / Ubuntu](docs/prerequisites-debian.md) · [Fedora / RHEL](docs/prerequisites-fedora.md)
@@ -145,7 +145,7 @@ Restart Claude Code after install — ways are now active.
 3. **SubagentStart** injects relevant ways into subagents spawned via Task
 4. Each way fires **once per session** — marker files prevent re-triggering
 
-Matching is tiered: regex patterns for known keywords/commands/files, [BM25](https://en.wikipedia.org/wiki/Okapi_BM25) term-frequency scoring for semantic similarity, with gzip NCD as fallback. See [matching.md](docs/hooks-and-ways/matching.md) for the full strategy.
+Matching is tiered: regex patterns for known keywords/commands/files, then [BM25](https://en.wikipedia.org/wiki/Okapi_BM25) term-frequency scoring for semantic similarity. See [matching.md](docs/hooks-and-ways/matching.md) for the full strategy.
 
 For the complete system guide — trigger flow, state machines, the pipeline from principle to implementation — see **[docs/hooks-and-ways/README.md](docs/hooks-and-ways/README.md)**.
 
@@ -196,7 +196,7 @@ After creating or tuning a way, verify it matches what you expect — and doesn'
 # Quick check: score a prompt against all semantic ways
 /ways-tests "write some unit tests for this module"
 
-# Automated: BM25 vs NCD against synthetic corpus (32 tests)
+# Automated: BM25 scorer against synthetic corpus (32 tests)
 tests/way-match/run-tests.sh fixture --verbose
 
 # Automated: score against real way.md files (31 tests)
@@ -206,7 +206,7 @@ tests/way-match/run-tests.sh integration
 # Start a fresh session, then: read and run tests/way-activation-test.md
 ```
 
-The fixture and integration tests compare BM25 accuracy against the gzip NCD fallback. Typical results: BM25 81-87% accuracy with 0 false positives, NCD 48-75% with occasional false positives on unrelated prompts. See [tests/way-match/results.md](tests/way-match/results.md) for detailed output and interpretation.
+The fixture and integration tests validate BM25 scorer accuracy. Typical results: 81-87% accuracy with 0 false positives. The test harness also benchmarks the legacy NCD fallback for comparison — see [tests/way-match/results.md](tests/way-match/results.md) for detailed output.
 
 Other test tools: `scripts/doc-graph.sh --stats` checks documentation link integrity; `governance/provenance-verify.sh` validates provenance metadata. Full test guide: [tests/README.md](tests/README.md).
 

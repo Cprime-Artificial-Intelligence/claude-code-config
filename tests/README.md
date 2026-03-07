@@ -9,11 +9,11 @@ tests/run-all.sh
 
 ## Way Matching Tests
 
-Three layers, from fast/automated to slow/interactive. See [way-match/results.md](way-match/results.md) for typical output with BM25 vs NCD comparison and interpretation.
+Three layers, from fast/automated to slow/interactive. See [way-match/results.md](way-match/results.md) for typical output and interpretation.
 
-### 1. Fixture Tests (BM25 vs NCD scorer comparison)
+### 1. Fixture Tests (BM25 scorer validation)
 
-Runs 70 test prompts against a fixed 20-way corpus (all softwaredev ways with BM25 semantic matching). Compares BM25 binary against gzip NCD baseline. Reports TP/FP/TN/FN for each scorer. Includes co-activation fixtures that validate multi-way triggering.
+Runs 70 test prompts against a fixed 20-way corpus (all softwaredev ways with BM25 semantic matching). Reports TP/FP/TN/FN. Also benchmarks the legacy NCD fallback for comparison. Includes co-activation fixtures that validate multi-way triggering.
 
 ```bash
 tests/way-match/run-tests.sh fixture --verbose
@@ -21,7 +21,7 @@ tests/way-match/run-tests.sh fixture --verbose
 bash tools/way-match/test-harness.sh --verbose
 ```
 
-Options: `--bm25-only`, `--ncd-only`, `--verbose`
+Options: `--bm25-only`, `--ncd-only` (legacy comparison), `--verbose`
 
 **What it covers**: Scorer accuracy, false positive rate, head-to-head comparison. Tests direct vocabulary matches, synonym/paraphrase variants, negative controls, and co-activation (multi-way expected sets).
 
